@@ -19,39 +19,18 @@ const hasVideo = videoUrl !== null
   Heads up! 👋
 
   This component comes with some `rtl` classes. Please remove them if they are not needed in your project.
--->
-<section class="relative h-[50vh] w-full overflow-hidden text-white">
-  <!-- Video Background -->
-  {hasVideo &&
-    <video autoplay muted loop class="absolute inset-0 w-full object-cover">
-      <source src={videoUrl} type="video/mp4">
-      Your browser does not support the video tag.
-    </video>}
 
-  <!-- Image Background -->
-  {imageUrl && !hasVideo &&
-    <Image
-      alt="Hero"
-      src={imageUrl}
-      class="absolute inset-0 w-full object-cover"
-      inferSize={true}
-    />}
-  <!-- Overlay -->
-  <div class="absolute inset-0 bg-black bg-opacity-50"></div>
-
-  <!-- Content Overlay -->
-  <div class="relative flex flex-col items-center justify-center text-center p-16 z-10">
-    {data.Heading && <h1 class="text-4xl md:text-6xl font-bold mb-4">{data.Heading}</h1>}
-    {data.SubHeading && <p class="text-lg md:text-xl max-w-2xl mb-8">
-      {data.SubHeading}
-    </p>}
-    {data.RichText &&
-      <div class="text-sm max-w-2xl mb-8" set:html={data.RichText.html} />}
-    {data.CallToAction.url &&
-      <a href={data.CallToAction.url.default}
-         class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transition duration-300">
-        {data.CallToAction.text}
-      </a>
-    }
+<!-- FullWidthBanner.astro -->
+<section class="relative h-[100vh] w-full overflow-hidden text-white">
+  <div
+  class="relative h-[50vh] w-screen bg-cover bg-center"
+  style={`background-image: url(${imageUrl});`}
+  >
+  <!-- Button at the bottom-left -->
+  <div class="absolute bottom-32 left-64">
+    <button class="bg-green-500 hover:bg-green-600 text-white font-medium px-6 py-2 rounded">
+      {data.CallToAction.text}
+    </button>
+  </div>
   </div>
 </section>

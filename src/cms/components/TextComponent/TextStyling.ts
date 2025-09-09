@@ -68,6 +68,22 @@ export function getHeadingElementStyles(
         case 'error':
             cssClasses.push('text-error');
             break;
+        // Brand-specific colors
+        case 'sage_green':
+            cssClasses.push('text-sage-green');
+            break;
+        case 'warm_beige':
+            cssClasses.push('text-warm-beige');
+            break;
+        case 'soft_white':
+            cssClasses.push('text-soft-white');
+            break;
+        case 'charcoal_gray':
+            cssClasses.push('text-charcoal-gray');
+            break;
+        case 'light_clay':
+            cssClasses.push('text-light-clay');
+            break;
     }
     return cssClasses;
 }

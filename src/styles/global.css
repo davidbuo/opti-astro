@@ -1,6 +1,13 @@
+/* Import brand fonts first */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @import 'tailwindcss';
-/* @import './inter.css'; */
-/* @theme {--font-sans: InterVariable, sans-serif;} */
+
+@theme {
+  --font-family-heading: "Playfair Display", serif;
+  --font-family-body: "Inter", sans-serif;
+}
 
 @plugin "@tailwindcss/typography";
 @plugin "daisyui" {
@@ -48,31 +55,294 @@
 }
 
 @layer base {
+    /* Set default theme to custom Nestly theme */
+    :root {
+        color-scheme: light;
+    }
+
+    html {
+        font-family: var(--font-family-body);
+        @apply text-base-content text-base leading-relaxed;
+        font-feature-settings: 'kern' 1, 'liga' 1;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+        font-family: var(--font-family-body);
+        @apply bg-base-100 text-base leading-relaxed;
+        font-weight: 400;
+    }
+
+    /* Lists with better spacing and styling */
     ul {
-        @apply list-inside list-disc;
+        @apply list-inside list-disc mb-4 space-y-1;
+        font-family: var(--font-family-body);
     }
     ol {
-        @apply list-inside list-decimal;
+        @apply list-inside list-decimal mb-4 space-y-1;
+        font-family: var(--font-family-body);
     }
+    
+    /* Paragraph styling for optimal readability */
     p {
-        @apply mb-4;
+        font-family: var(--font-family-body);
+        @apply mb-6 text-base leading-relaxed;
+        max-width: 65ch; /* Optimal reading width */
+        font-weight: 400;
     }
+    
+    /* Make paragraphs inside containers more flexible */
+    .container p, 
+    .prose p,
+    [class*="col"] p,
+    [class*="grid"] p {
+        max-width: none;
+    }
+    
+    /* Lead text for introductory paragraphs */
+    .lead {
+        font-family: var(--font-family-body);
+        @apply text-lg leading-relaxed text-neutral mb-6;
+        font-weight: 400;
+        max-width: 60ch;
+    }
+    
+    /* Typography - Headings use Playfair Display (elegant serif) */
+    h1, h2, h3, h4, h5, h6 {
+        font-family: var(--font-family-heading);
+        @apply text-neutral leading-tight;
+        font-feature-settings: 'kern' 1, 'liga' 1;
+    }
+    
     h1 {
-        @apply text-3xl;
+        @apply text-5xl md:text-6xl font-bold mb-8 leading-tight;
+        letter-spacing: -0.02em;
     }
     h2 {
-        @apply text-2xl;
+        @apply text-4xl md:text-5xl font-semibold mb-6 leading-tight;
+        letter-spacing: -0.015em;
     }
     h3 {
-        @apply text-xl;
+        @apply text-3xl md:text-4xl font-semibold mb-5 leading-tight;
+        letter-spacing: -0.01em;
     }
     h4 {
-        @apply text-lg;
+        @apply text-2xl md:text-3xl font-medium mb-4 leading-tight;
+        letter-spacing: -0.005em;
     }
     h5 {
-        @apply text-base;
+        @apply text-xl md:text-2xl font-medium mb-3 leading-tight;
     }
     h6 {
-        @apply text-sm;
+        @apply text-lg md:text-xl font-medium mb-3 leading-tight;
+    }
+    
+    /* Button and accent text styles - Rounded pill design matching Nestly brand */
+    /* Override DaisyUI button styles with higher specificity */
+    .btn, 
+    a.btn,
+    button.btn {
+        font-family: var(--font-family-body) !important;
+        text-transform: none !important;
+        letter-spacing: 0.025em !important;
+        font-weight: 500 !important;
+        font-size: 1rem !important;
+        padding: 0.75rem 2rem !important;
+        border-radius: 50px !important;
+        transition: all 0.3s ease-in-out !important;
+        font-feature-settings: 'kern' 1 !important;
+        min-height: auto !important;
+        height: auto !important;
+        border-width: 0px !important;
+        border-style: none !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        max-width: 280px !important;
+    }
+    
+    /* Primary button styling with sage green - Override DaisyUI */
+    .btn-primary,
+    a.btn-primary,
+    button.btn-primary {
+        background-color: #9CAF7F !important; /* Sage Green from image */
+        color: #FFFFFF !important; /* Pure white */
+        border: none !important;
+    }
+    
+    .btn-primary:hover,
+    a.btn-primary:hover,
+    button.btn-primary:hover {
+        background-color: #8B9E6F !important; /* Darker sage green on hover */
+        color: #FFFFFF !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 16px rgba(156, 175, 127, 0.3) !important;
+    }
+    
+    /* Secondary button styling with warm beige - Override DaisyUI */
+    .btn-secondary,
+    a.btn-secondary,
+    button.btn-secondary {
+        background-color: #E8D5B7 !important; /* Warm Beige from image */
+        color: #5D5D5D !important; /* Charcoal Gray */
+        border: none !important;
+    }
+    
+    .btn-secondary:hover,
+    a.btn-secondary:hover,
+    button.btn-secondary:hover {
+        background-color: #DCC8A4 !important; /* Slightly darker beige */
+        color: #5D5D5D !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 16px rgba(232, 213, 183, 0.3) !important;
+    }
+    
+    /* Accent button styling - Override DaisyUI */
+    .btn-accent,
+    a.btn-accent,
+    button.btn-accent {
+        background-color: #DAD2C7 !important; /* Light Clay */
+        color: #5D5D5D !important; /* Charcoal Gray */
+        border: none !important;
+    }
+    
+    .btn-accent:hover,
+    a.btn-accent:hover,
+    button.btn-accent:hover {
+        background-color: #CFC6B8 !important; /* Slightly darker clay */
+        color: #5D5D5D !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 16px rgba(218, 210, 199, 0.3) !important;
+    }
+    
+    /* Outline button styling - Override DaisyUI */
+    .btn-outline,
+    a.btn-outline,
+    button.btn-outline {
+        background-color: rgba(255, 255, 255, 0.15) !important;
+        color: #FFFFFF !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        backdrop-filter: blur(10px) !important;
+    }
+    
+    .btn-outline:hover,
+    a.btn-outline:hover,
+    button.btn-outline:hover {
+        background-color: rgba(255, 255, 255, 0.25) !important;
+        color: #FFFFFF !important;
+        border-color: rgba(255, 255, 255, 0.5) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 16px rgba(255, 255, 255, 0.15) !important;
+    }
+    
+    /* Navigation-specific button sizing for compact appearance */
+    .navbar .btn,
+    .navbar a.btn,
+    .navbar button.btn {
+        padding: 0.5rem 1.5rem !important;
+        font-size: 0.875rem !important;
+    }
+    
+    /* Circular button styling */
+    .btn-circle,
+    a.btn-circle,
+    button.btn-circle {
+        border-radius: 50% !important;
+        width: 2.5rem !important;
+        height: 2.5rem !important;
+        padding: 0 !important;
+        min-height: 2.5rem !important;
+    }
+    
+    .btn-circle.btn-sm,
+    a.btn-circle.btn-sm,
+    button.btn-circle.btn-sm {
+        width: 2rem !important;
+        height: 2rem !important;
+        min-height: 2rem !important;
+    }
+    
+    /* Accent text styling for small caps/uppercase elements */
+    .accent-text {
+        font-family: var(--font-family-body);
+        @apply uppercase tracking-widest font-semibold text-xs;
+        letter-spacing: 0.12em;
+        color: #A3B18A; /* Sage Green */
+        font-feature-settings: 'smcp' 1; /* Small caps if available */
+    }
+    
+    /* Link styling with brand colors */
+    a {
+        color: #A3B18A;
+        text-decoration: none;
+        transition: color 0.2s ease-in-out;
+    }
+    
+    a:hover {
+        color: #8FA077;
+        text-decoration: underline;
+        text-decoration-color: #A3B18A;
+        text-underline-offset: 0.2em;
+    }
+    
+    /* Typography utility classes for content creators */
+    .display-1 {
+        font-family: var(--font-family-heading);
+        @apply text-6xl md:text-7xl font-bold text-neutral leading-none mb-8;
+        letter-spacing: -0.025em;
+    }
+    
+    .display-2 {
+        font-family: var(--font-family-heading);
+        @apply text-5xl md:text-6xl font-bold text-neutral leading-tight mb-6;
+        letter-spacing: -0.02em;
+    }
+    
+    .text-large {
+        font-family: var(--font-family-body);
+        @apply text-xl leading-relaxed mb-6;
+        max-width: 60ch;
+    }
+    
+    .text-small {
+        font-family: var(--font-family-body);
+        @apply text-sm leading-relaxed mb-4;
+    }
+    
+    .text-caption {
+        font-family: var(--font-family-body);
+        @apply text-xs uppercase tracking-widest font-medium mb-2;
+        letter-spacing: 0.1em;
+        color: #A3B18A; /* Sage Green */
+    }
+    
+    .text-quote {
+        font-family: var(--font-family-heading);
+        @apply text-2xl md:text-3xl font-medium italic text-neutral leading-relaxed mb-6;
+        color: #3D3D3D; /* Charcoal Gray */
+    }
+    
+    /* Nestly-specific utility classes */
+    .nestly-heading {
+        font-family: var(--font-family-heading);
+        @apply font-semibold text-neutral;
+        letter-spacing: -0.01em;
+    }
+    
+    .nestly-body {
+        font-family: var(--font-family-body);
+        @apply leading-relaxed;
+        font-weight: 400;
+    }
+    
+    .nestly-accent {
+        @apply uppercase tracking-widest font-semibold text-xs;
+        color: #A3B18A; /* Sage Green */
+        letter-spacing: 0.1em;
     }
 }

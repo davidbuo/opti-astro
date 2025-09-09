@@ -31,10 +31,10 @@ const buttonTypes = ['btn-primary', 'btn-secondary', 'btn-accent', 'btn-info', '
 const getButtonType = (index: number) => buttonTypes[index] || 'btn-primary';
 
 const cssClassesSection = {
-    textOnRight: 'content-center',
-    textOnLeft: 'content-center',
-    textAboveCard: 'text-center',
-    textBelowCard: 'text-center',
+    textOnRight: 'flex flex-col items-center text-center',
+    textOnLeft: 'flex flex-col items-center text-center',
+    textAboveCard: 'flex flex-col items-center text-center',
+    textBelowCard: 'flex flex-col items-center text-center',
     hover: 'content-center text-center',
 };
 const cssTextClasses = {
@@ -122,7 +122,7 @@ const contentClasses = isFullSplit
             {/* Always visible heading */}
             {data.Heading && (
                 <div class={headingClasses}>
-                    <h2 class={`text-4xl font-bold ${cardHeaderStyles}`}>
+                    <h2 class={`nestly-heading text-3xl font-semibold mb-4 ${cardHeaderStyles}`}>
                         {data.Heading}
                     </h2>
                 </div>
@@ -131,7 +131,7 @@ const contentClasses = isFullSplit
             {/* Hover overlay with remaining content */}
             <div class={overlayContentClasses}>
                 {data.SubHeading && (
-                    <p class="text-sm font-semibold opacity-80 mb-4">
+                    <p class="nestly-accent mb-4 text-white">
                         {data.SubHeading}
                     </p>
                 )}
@@ -156,17 +156,17 @@ const contentClasses = isFullSplit
         <!-- Normal Mode: All content together -->
         <>
             {data.Heading && (
-                <h2 class={`text-4xl font-bold ${cardHeaderStyles}`} class:list={cssClassesForText}>
+                <h2 class={`nestly-heading text-2xl md:text-3xl font-semibold mb-4 ${cardHeaderStyles}`} class:list={cssClassesForText}>
                     {data.Heading}
                 </h2>
             )}
             {data.SubHeading && (
-                <p class="text-sm font-semibold opacity-80" class:list={cssClassesForText}>
+                <p class="nestly-accent mb-3" class:list={cssClassesForText}>
                     {data.SubHeading}
                 </p>
             )}
             {data.Body?.html && (
-                <div class={`${cssClassesForText} opacity-75`} set:html={data.Body.html}></div>
+                <div class={`${cssClassesForText} text-gray-600 leading-relaxed`} set:html={data.Body.html}></div>
             )}
             {data.Links && data.Links.length > 0 && (
                 <div class={cssClassesForCallToAction}>

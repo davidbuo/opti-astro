@@ -82,12 +82,12 @@ const hoverClasses = {
 
     <!-- Content -->
     <div class="relative z-10 px-6" class:list={textClasses}>
-        <h1 class="text-5xl font-bold md:text-6xl" class:list={textClasses}>{data?.Heading}</h1>
-        <p class="mx-auto mt-4 text-xl" class:list={textClasses}>
+        <h1 class="display-1" class:list={textClasses}>{data?.Heading}</h1>
+        <p class="lead mx-auto mt-6" class:list={textClasses}>
             {data?.SubHeading}
         </p>
-        <p
-            class="mx-auto mt-4 max-w-2xl text-base opacity-80"
+        <div
+            class="mx-auto mt-6 max-w-2xl text-large opacity-90"
             class:list={textClasses}
             set:html={data.Body?.html}
         />

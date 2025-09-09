@@ -25,6 +25,6 @@ const HeadingStyle = (settings?.headingType == "plain" || settings?.headingType 
 
 ---
 
-<HeadingStyle class:list={getHeadingElementStyles(displaySettings)} data-epi-block-id={isCmsEdit && key || undefined}>
+<HeadingStyle class:list={[getHeadingElementStyles(displaySettings), HeadingStyle !== 'span' ? 'nestly-heading' : 'nestly-body']} data-epi-block-id={isCmsEdit && key || undefined}>
     {data.Content}
 </HeadingStyle>

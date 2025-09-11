@@ -6,6 +6,7 @@ import { ClientRouter } from 'astro:transitions';
 import type { Locales } from '../../__generated/sdk';
 import Footer from '../cms/shared/Footer.astro';
 import Header from '../cms/shared/Header.astro';
+import SearchPalette from '../cms/shared/SearchPalette.astro';
 import SiteStyles from '../cms/components/SiteStylesComponent/SiteStyles.astro';
 import { getSiteFont } from '../cms/shared/siteStylesHelper';
 import { EXTERNAL_PREVIEW_ENABLED, OPTIMIZELY_DATA_PLATFORM_PRIVATE_KEY } from 'astro:env/server';
@@ -79,6 +80,7 @@ console.log('=== First Query Result ===');
 console.log('Query domain:', actualHost);
 console.log('Found site settings:', !!siteSettings?.SiteSettings?.item);
 console.log('Site domain in result:', siteSettings?.SiteSettings?.item?.SiteDomain);
+
 
 // If no site settings found, log the issue
 if (!siteSettings?.SiteSettings?.item) {
@@ -184,14 +186,16 @@ const contentKey = contentPayload.key || '';
             )
         }
         {(() => {
-            console.log('=== Header Site Settings Debug ===');
-            console.log('Site settings being passed to Header:', siteSettings?.SiteSettings?.item);
-            console.log('HeaderLinks being passed:', siteSettings?.SiteSettings?.item?.HeaderLinks);
-            console.log('HeaderLinks count:', siteSettings?.SiteSettings?.item?.HeaderLinks?.length || 0);
-            console.log('=====================================');
+            console.log('=== CRITICAL DEBUG: Header vs Layout ===');
+            console.log('Same siteSettings object?', siteSettings === siteSettings);
+            console.log('SiteSettings type:', typeof siteSettings?.SiteSettings?.item);
+            console.log('Full siteSettings structure:', JSON.stringify(siteSettings, null, 2));
+            console.log('========================================');
             return null;
         })()}
         <Header siteSettings={siteSettings} />
+        <SearchPalette />
+        <!-- Search component added -->
         <slot />
         <Footer siteSettings={siteSettings} />
 

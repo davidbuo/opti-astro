@@ -6,12 +6,12 @@ const currentLocale = getCurrentLocale(Astro);
 ---
 
 <div
-    x-data="searchPalette()"
+    x-data="{ isOpen: false, query: '', results: [], loading: false, error: null, useSemanticSearch: false, semanticWeight: '0.3', locale: '', init() { this.locale = this.$el.dataset.locale || 'en'; }, async search() { if (!this.query) { this.results = []; return; } try { this.loading = true; this.error = null; const params = new URLSearchParams({ q: this.query, locale: this.locale }); if (this.useSemanticSearch) { params.append('semantic', 'true'); params.append('semanticWeight', this.semanticWeight); } const response = await fetch('/api/search.json?' + params.toString()); if (!response.ok) throw new Error('Failed to search'); const data = await response.json(); this.results = data.results || []; } catch (err) { this.error = err.message; } finally { this.loading = false; } }, navigateToResult(result) { if (result.url && result.url !== '#') { window.location.href = result.url; this.isOpen = false; } } }"
     data-locale={currentLocale}
     x-show="isOpen"
     x-cloak
     @keydown.escape.window="isOpen = false"
-    @open-command-palette.window="isOpen = true; $nextTick(() => $refs.searchInput.focus())"
+    @open-command-palette.window="isOpen = true; $nextTick(() => { const input = document.querySelector('[x-ref=searchInput]'); if(input) input.focus(); })"
     class="fixed inset-0 z-50"
     style="display: none;"
 >
@@ -284,72 +284,6 @@ const currentLocale = getCurrentLocale(Astro);
     }
 </style>
 
-<script is:inline>
-    function searchPalette() {
-        return {
-            isOpen: false,
-            query: '',
-            results: [],
-            loading: false,
-            error: null,
-            useSemanticSearch: false,
-            semanticWeight: '0.3',
-            locale: '',
-
-            init() {
-                this.results = [];
-                this.isOpen = false;
-                // Get locale from data attribute
-                this.locale = this.$el.dataset.locale || 'en';
-            },
-
-            async search() {
-                if (!this.query) {
-                    this.results = [];
-                    return;
-                }
-
-                try {
-                    this.loading = true;
-                    this.error = null;
-
-                    const searchParams = new URLSearchParams({
-                        q: this.query,
-                        locale: this.locale
-                    });
-                    
-                    if (this.useSemanticSearch) {
-                        searchParams.append('semantic', 'true');
-                        searchParams.append('semanticWeight', this.semanticWeight);
-                    }
-
-                    const response = await fetch(
-                        `/api/search.json?${searchParams.toString()}`
-                    );
-                    if (!response.ok) {
-                        throw new Error('Failed to perform search');
-                    }
-
-                    const data = await response.json();
-                    // Force Alpine.js reactivity by creating a new array
-                    this.results = [...(data.results || [])];
-                } catch (err) {
-                    this.error = err.message;
-                    console.error('Error performing search:', err);
-                } finally {
-                    this.loading = false;
-                }
-            },
-
-            navigateToResult(result) {
-                if (result.url && result.url !== '#') {
-                    window.location.href = result.url;
-                    this.isOpen = false;
-                }
-            },
-        };
-    }
-</script>
 
 <style>
     #search-palette {

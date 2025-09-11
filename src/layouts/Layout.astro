@@ -46,24 +46,69 @@ const contentVersion = contentPayload.ver || '';
 const isDraft = EXTERNAL_PREVIEW_ENABLED && extPreviewEnabled && await isDraftContent(contentVersion);
 
 const { host } = Astro.url;
-const siteSettings = await getOptimizelySdk(
+
+// Debug domain resolution
+console.log('=== Domain Resolution Debug ===');
+console.log('Original Host:', host);
+console.log('Full URL:', Astro.url.href);
+console.log('URL hostname:', Astro.url.hostname);
+console.log('URL origin:', Astro.url.origin);
+console.log('URL protocol:', Astro.url.protocol);
+console.log('URL port:', Astro.url.port);
+console.log('Is localhost?', host.includes('localhost'));
+console.log('Is Vercel?', host.includes('vercel.app'));
+console.log('Is opti-demo.com?', host.includes('opti-demo.com'));
+console.log('================================');
+
+// First try with the original host
+let siteSettings = await getOptimizelySdk(
     contentPayload
 ).siteSettingsByHostname({
     domain: host,
     locale: [contentPayload.loc as Locales],
 });
 
+console.log('=== First Query Result ===');
+console.log('Query domain:', host);
+console.log('Found site settings:', !!siteSettings?.SiteSettings?.item);
+console.log('Site domain in result:', siteSettings?.SiteSettings?.item?.SiteDomain);
+
+// If no site settings found, let's analyze what we should try next
+if (!siteSettings?.SiteSettings?.item) {
+    console.log('=== No Site Settings Found - Analyzing Host ===');
+    
+    // For now, let's just log this case and see what we're dealing with
+    // We should avoid hardcoded fallbacks and instead:
+    // 1. Check if this is a deployment URL that should map to a production domain
+    // 2. Or if the CMS simply doesn't have this domain configured
+    
+    console.log('Host analysis:');
+    console.log('- Is deployment URL?', host.includes('vercel.app') || host.includes('netlify.app') || host.includes('herokuapp.com'));
+    console.log('- Is localhost?', host.includes('localhost'));
+    console.log('- Is production domain?', host.includes('opti-demo.com') || (!host.includes('vercel') && !host.includes('localhost')));
+    
+    // TODO: Instead of hardcoded fallbacks, we should either:
+    // A) Have a way to query all site settings and find one that matches
+    // B) Have environment variables that map deployment URLs to production domains
+    // C) Configure the deployment domain properly in the CMS
+    
+    console.log('WARNING: No site settings found for domain:', host);
+    console.log('Please ensure this domain is configured in CMS Site Settings > Site Domain');
+    console.log('================================================');
+}
+
 const optiWebProjectId = siteSettings?.SiteSettings?.item?.OptiWebProjectId || null;
 
 // Debug logging for optiWebProjectId
-console.log('=== OptiWeb Debug Info ===');
-console.log('Host:', host);
-console.log('Site Settings Item:', siteSettings?.SiteSettings?.item);
+console.log('=== Final OptiWeb Debug Info ===');
+console.log('Original Host:', host);
+console.log('Final Site Settings Item:', siteSettings?.SiteSettings?.item);
+console.log('Site Domain from CMS:', siteSettings?.SiteSettings?.item?.SiteDomain);
 console.log('OptiWebProjectId from CMS:', siteSettings?.SiteSettings?.item?.OptiWebProjectId);
 console.log('Final optiWebProjectId:', optiWebProjectId);
 console.log('isCmsEdit:', isCmsEdit);
 console.log('Will load Optimizely script?', !isCmsEdit && !!optiWebProjectId);
-console.log('========================');
+console.log('================================');
 const pageVariationWeb = Astro.url.searchParams.get('var') || null;
 
 const odpEnabled = !!OPTIMIZELY_DATA_PLATFORM_PRIVATE_KEY;

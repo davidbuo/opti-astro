@@ -61,6 +61,13 @@ console.log('Is opti-demo.com?', host.includes('opti-demo.com'));
 console.log('================================');
 
 // First try with the original host
+console.log('=== GraphQL Query Parameters ===');
+console.log('contentPayload:', contentPayload);
+console.log('contentPayload.loc:', contentPayload.loc);
+console.log('Locale array:', [contentPayload.loc as Locales]);
+console.log('Domain parameter:', host);
+console.log('================================');
+
 let siteSettings = await getOptimizelySdk(
     contentPayload
 ).siteSettingsByHostname({
@@ -115,10 +122,18 @@ const odpEnabled = !!OPTIMIZELY_DATA_PLATFORM_PRIVATE_KEY;
 const odpPublicKey = odpEnabled && OPTIMIZELY_DATA_PLATFORM_PRIVATE_KEY?.split('.')[0];
 // const odpScript = odpPublicKey && getOdpScript(odpPublicKey);
 
+console.log('=== Site Styles Query Debug ===');
+console.log('Domain for styles query:', host);
+console.log('Locale for styles query:', [contentPayload.loc as Locales]);
+
 const siteStyles = await getOptimizelySdk(contentPayload).siteStylesByHostname({
     domain: host,
     locale: [contentPayload.loc as Locales],
 });
+
+console.log('Site styles found:', !!siteStyles?.SiteStyles?.item);
+console.log('Site styles domain:', siteStyles?.SiteStyles?.item?.SiteStylesDomain);
+console.log('===============================');
 
 const siteFont = getSiteFont(siteStyles?.SiteStyles?.item);
 
@@ -184,6 +199,14 @@ const contentKey = contentPayload.key || '';
                 />
             )
         }
+        {(() => {
+            console.log('=== Header Site Settings Debug ===');
+            console.log('Site settings being passed to Header:', siteSettings?.SiteSettings?.item);
+            console.log('HeaderLinks being passed:', siteSettings?.SiteSettings?.item?.HeaderLinks);
+            console.log('HeaderLinks count:', siteSettings?.SiteSettings?.item?.HeaderLinks?.length || 0);
+            console.log('=====================================');
+            return null;
+        })()}
         <Header siteSettings={siteSettings} />
         <slot />
         <Footer siteSettings={siteSettings} />

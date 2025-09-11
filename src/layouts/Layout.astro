@@ -45,19 +45,19 @@ const isCmsEdit = isEditContext(Astro.url);
 const contentVersion = contentPayload.ver || '';
 const isDraft = EXTERNAL_PREVIEW_ENABLED && extPreviewEnabled && await isDraftContent(contentVersion);
 
-const { host } = Astro.url;
+// Get the actual domain from headers when using custom domains
+const headers = Astro.request.headers;
+const hostHeader = headers.get('host') || headers.get('x-forwarded-host') || headers.get('x-original-host');
+const actualHost = hostHeader || Astro.url.host;
 
 // Debug domain resolution
 console.log('=== Domain Resolution Debug ===');
-console.log('Original Host:', host);
+console.log('Astro.url.host:', Astro.url.host);
+console.log('Request headers host:', headers.get('host'));
+console.log('X-Forwarded-Host:', headers.get('x-forwarded-host'));
+console.log('X-Original-Host:', headers.get('x-original-host'));
+console.log('Resolved actual host:', actualHost);
 console.log('Full URL:', Astro.url.href);
-console.log('URL hostname:', Astro.url.hostname);
-console.log('URL origin:', Astro.url.origin);
-console.log('URL protocol:', Astro.url.protocol);
-console.log('URL port:', Astro.url.port);
-console.log('Is localhost?', host.includes('localhost'));
-console.log('Is Vercel?', host.includes('vercel.app'));
-console.log('Is opti-demo.com?', host.includes('opti-demo.com'));
 console.log('================================');
 
 // First try with the original host
@@ -65,50 +65,34 @@ console.log('=== GraphQL Query Parameters ===');
 console.log('contentPayload:', contentPayload);
 console.log('contentPayload.loc:', contentPayload.loc);
 console.log('Locale array:', [contentPayload.loc as Locales]);
-console.log('Domain parameter:', host);
+console.log('Domain parameter:', actualHost);
 console.log('================================');
 
 let siteSettings = await getOptimizelySdk(
     contentPayload
 ).siteSettingsByHostname({
-    domain: host,
+    domain: actualHost,
     locale: [contentPayload.loc as Locales],
 });
 
 console.log('=== First Query Result ===');
-console.log('Query domain:', host);
+console.log('Query domain:', actualHost);
 console.log('Found site settings:', !!siteSettings?.SiteSettings?.item);
 console.log('Site domain in result:', siteSettings?.SiteSettings?.item?.SiteDomain);
 
-// If no site settings found, let's analyze what we should try next
+// If no site settings found, log the issue
 if (!siteSettings?.SiteSettings?.item) {
-    console.log('=== No Site Settings Found - Analyzing Host ===');
-    
-    // For now, let's just log this case and see what we're dealing with
-    // We should avoid hardcoded fallbacks and instead:
-    // 1. Check if this is a deployment URL that should map to a production domain
-    // 2. Or if the CMS simply doesn't have this domain configured
-    
-    console.log('Host analysis:');
-    console.log('- Is deployment URL?', host.includes('vercel.app') || host.includes('netlify.app') || host.includes('herokuapp.com'));
-    console.log('- Is localhost?', host.includes('localhost'));
-    console.log('- Is production domain?', host.includes('opti-demo.com') || (!host.includes('vercel') && !host.includes('localhost')));
-    
-    // TODO: Instead of hardcoded fallbacks, we should either:
-    // A) Have a way to query all site settings and find one that matches
-    // B) Have environment variables that map deployment URLs to production domains
-    // C) Configure the deployment domain properly in the CMS
-    
-    console.log('WARNING: No site settings found for domain:', host);
+    console.log('=== No Site Settings Found ===');
+    console.log('Domain queried:', actualHost);
     console.log('Please ensure this domain is configured in CMS Site Settings > Site Domain');
-    console.log('================================================');
+    console.log('===============================');
 }
 
 const optiWebProjectId = siteSettings?.SiteSettings?.item?.OptiWebProjectId || null;
 
 // Debug logging for optiWebProjectId
 console.log('=== Final OptiWeb Debug Info ===');
-console.log('Original Host:', host);
+console.log('Original Host:', actualHost);
 console.log('Final Site Settings Item:', siteSettings?.SiteSettings?.item);
 console.log('Site Domain from CMS:', siteSettings?.SiteSettings?.item?.SiteDomain);
 console.log('OptiWebProjectId from CMS:', siteSettings?.SiteSettings?.item?.OptiWebProjectId);
@@ -123,11 +107,11 @@ const odpPublicKey = odpEnabled && OPTIMIZELY_DATA_PLATFORM_PRIVATE_KEY?.split('
 // const odpScript = odpPublicKey && getOdpScript(odpPublicKey);
 
 console.log('=== Site Styles Query Debug ===');
-console.log('Domain for styles query:', host);
+console.log('Domain for styles query:', actualHost);
 console.log('Locale for styles query:', [contentPayload.loc as Locales]);
 
 const siteStyles = await getOptimizelySdk(contentPayload).siteStylesByHostname({
-    domain: host,
+    domain: actualHost,
     locale: [contentPayload.loc as Locales],
 });
 

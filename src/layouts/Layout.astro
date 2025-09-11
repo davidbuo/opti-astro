@@ -54,6 +54,16 @@ const siteSettings = await getOptimizelySdk(
 });
 
 const optiWebProjectId = siteSettings?.SiteSettings?.item?.OptiWebProjectId || null;
+
+// Debug logging for optiWebProjectId
+console.log('=== OptiWeb Debug Info ===');
+console.log('Host:', host);
+console.log('Site Settings Item:', siteSettings?.SiteSettings?.item);
+console.log('OptiWebProjectId from CMS:', siteSettings?.SiteSettings?.item?.OptiWebProjectId);
+console.log('Final optiWebProjectId:', optiWebProjectId);
+console.log('isCmsEdit:', isCmsEdit);
+console.log('Will load Optimizely script?', !isCmsEdit && !!optiWebProjectId);
+console.log('========================');
 const pageVariationWeb = Astro.url.searchParams.get('var') || null;
 
 const odpEnabled = !!OPTIMIZELY_DATA_PLATFORM_PRIVATE_KEY;
@@ -80,11 +90,24 @@ const contentKey = contentPayload.key || '';
 <html data-theme="nestly" lang="en">
     <head>
         <meta charset="UTF-8" />
-        {!isCmsEdit && optiWebProjectId && (
-            <link rel="preload" href={`//cdn.optimizely.com/js/${optiWebProjectId}.js`} as="script" />
-            <link rel="preconnect" href="//logx.optimizely.com" />
-            <script src={`https://cdn.optimizely.com/js/${optiWebProjectId}.js`} />
-        )}
+{(() => {
+            const shouldLoadOpti = !isCmsEdit && optiWebProjectId;
+            console.log('=== Script Loading Decision ===');
+            console.log('Should load Optimizely script:', shouldLoadOpti);
+            console.log('Script URL would be:', shouldLoadOpti ? `https://cdn.optimizely.com/js/${optiWebProjectId}.js` : 'N/A');
+            console.log('===============================');
+            
+            if (shouldLoadOpti) {
+                return (
+                    <>
+                        <link rel="preload" href={`//cdn.optimizely.com/js/${optiWebProjectId}.js`} as="script" />
+                        <link rel="preconnect" href="//logx.optimizely.com" />
+                        <script src={`https://cdn.optimizely.com/js/${optiWebProjectId}.js`} />
+                    </>
+                );
+            }
+            return null;
+        })()}
         {odpEnabled && (
             <DataPlatform odpPublicKey={odpPublicKey} />
         )}

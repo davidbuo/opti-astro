@@ -40,29 +40,6 @@ const headerItemCount = headerItems?.length || 0;
 <header class="sticky top-0 z-50 bg-gray-50/70 backdrop-blur-sm">
     <div class="navbar bg-base-100 shadow-sm">
         <div class="navbar-start">
-            <div class="dropdown lg:hidden">
-                <div tabindex="0" role="button" class="btn btn-ghost">
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-5 w-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M4 6h16M4 12h8m-8 6h16"></path>
-                    </svg>
-                </div>
-                <ul
-                    tabindex="0"
-                    class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 text-lg shadow"
-                >
-                    0
-                </ul>
-            </div>
             <a class="text-neutral nestly-heading block px-8" href="/">
                 <span class="sr-only">Home</span>
                 <span class="text-2xl font-bold">Nestly</span>
@@ -86,10 +63,10 @@ const headerItemCount = headerItems?.length || 0;
             </div>
         </div>
         <div class="navbar-end gap-4" x-data="{}">
-            <!-- Action Buttons -->
-            <div class="flex items-center gap-3">
+            <!-- Desktop Action Buttons -->
+            <div class="hidden items-center gap-3 lg:flex">
                 <button
-                    class="btn btn-ghost text-neutral hover:text-primary hidden gap-2 transition-colors lg:inline-flex"
+                    class="btn btn-ghost text-neutral hover:text-primary gap-2 transition-colors"
                     @click="window.dispatchEvent(new CustomEvent('open-command-palette'))"
                 >
                     <svg
@@ -109,7 +86,7 @@ const headerItemCount = headerItems?.length || 0;
                 </button>
                 <a
                     href="https://app-epsadabuoas7yk1mp001.cms.optimizely.com/ui/cms"
-                    class="btn btn-ghost text-neutral hover:text-primary hidden gap-2 transition-colors lg:inline-flex"
+                    class="btn btn-ghost text-neutral hover:text-primary gap-2 transition-colors"
                 >
                     <svg
                         class="h-4 w-4"
@@ -128,32 +105,30 @@ const headerItemCount = headerItems?.length || 0;
                 </a>
                 <a href="#" class="btn btn-primary">GET STARTED</a>
             </div>
-            <!-- Mobile Menu Button -->
+            
+            <!-- Mobile Hamburger Menu -->
             <div class="dropdown dropdown-end lg:hidden">
                 <label tabindex="0" class="btn btn-ghost btn-circle">
-                    <svg
-                        class="h-5 w-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
+                    <div class="flex flex-col gap-1">
+                        <div class="w-5 h-0.5 bg-black"></div>
+                        <div class="w-5 h-0.5 bg-black"></div>
+                        <div class="w-5 h-0.5 bg-black"></div>
+                    </div>
                 </label>
                 <ul
                     tabindex="0"
-                    class="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
+                    class="menu menu-sm dropdown-content bg-white rounded-box z-[1] mt-3 w-52 p-4 shadow-lg border"
                 >
+                    <!-- Header Links -->
                     {
                         headerItems &&
                             headerItemCount > 0 &&
                             headerItems.map((data) => (
                                 <li>
-                                    <a href={data?.Link?.url?.default || '#'}>
+                                    <a 
+                                        href={data?.Link?.url?.default || '#'}
+                                        class="text-neutral hover:text-primary transition-colors"
+                                    >
                                         {data?.LinkText ||
                                             data?.Link?.text ||
                                             ''}
@@ -161,12 +136,14 @@ const headerItemCount = headerItems?.length || 0;
                                 </li>
                             ))
                     }
-                    <li
-                        class="mt-2 flex flex-row justify-center gap-2 border-t pt-2"
-                    >
+                    
+                    <!-- Divider if header links exist -->
+                    {headerItemCount > 0 && <div class="divider my-2"></div>}
+                    
+                    <!-- Action Items -->
+                    <li>
                         <button
-                            class="btn btn-ghost btn-circle btn-sm text-neutral hover:text-primary transition-colors"
-                            title="Search"
+                            class="flex items-center gap-2 text-neutral hover:text-primary transition-colors w-full justify-start"
                             @click="window.dispatchEvent(new CustomEvent('open-command-palette'))"
                         >
                             <svg
@@ -182,11 +159,13 @@ const headerItemCount = headerItems?.length || 0;
                                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                                 ></path>
                             </svg>
+                            Search
                         </button>
-                        <a
-                            href="#"
-                            class="btn btn-ghost btn-circle btn-sm text-neutral hover:text-primary transition-colors"
-                            title="Sign In"
+                    </li>
+                    <li>
+                        <a 
+                            href="https://app-epsadabuoas7yk1mp001.cms.optimizely.com/ui/cms"
+                            class="flex items-center gap-2 text-neutral hover:text-primary transition-colors"
                         >
                             <svg
                                 class="h-4 w-4"
@@ -201,10 +180,16 @@ const headerItemCount = headerItems?.length || 0;
                                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                                 ></path>
                             </svg>
+                            Login
                         </a>
-                        <a href="#" class="btn btn-primary btn-sm"
-                            >GET STARTED</a
-                        >
+                    </li>
+                    
+                    <!-- Primary CTA at bottom -->
+                    <div class="divider my-2"></div>
+                    <li>
+                        <a href="#" class="btn btn-primary btn-sm w-full">
+                            GET STARTED
+                        </a>
                     </li>
                 </ul>
             </div>

@@ -1,7 +1,7 @@
 {
 	"key": "OdpForm",
 	"displayName": "ODP Form",
-	"description": "Embeds and manages Optimizely Data Platform forms directly in CMS content.",
+	"description": "Optimizely Data Platform form integration block",
 	"baseType": "component",
 	"sortOrder": 0,
 	"mayContainTypes": [],
@@ -17,22 +17,10 @@
 			"displayName": "Selector Type",
 			"description": "Choose whether to target by ID or CSS class",
 			"localized": false,
-			"required": true,
-			"group": "Content",
+			"required": false,
+			"group": "StylesColors",
 			"sortOrder": 10,
-			"editorSettings": {},
-			"enum": {
-				"values": [
-					{
-						"displayName": "ID",
-						"value": "id"
-					},
-					{
-						"displayName": "Class",
-						"value": "class"
-					}
-				]
-			}
+			"editorSettings": {}
 		},
 		"SelectorName": {
 			"type": "string",
@@ -41,7 +29,7 @@
 			"description": "The ID or class name to target (without # or .)",
 			"localized": false,
 			"required": true,
-			"group": "Content",
+			"group": "StylesColors",
 			"sortOrder": 20,
 			"editorSettings": {}
 		}

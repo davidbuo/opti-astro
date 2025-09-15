@@ -1,0 +1,15 @@
+fragment BlogPage on BlogPage {
+    _metadata {
+        ...PageUrl
+        published
+        displayName
+    }
+    Title
+    Subtitle
+    Body {
+        html
+    }
+    PageAdminSettings {
+        ...PageAdminSettingsProperty
+    }
+}

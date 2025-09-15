@@ -1,0 +1,102 @@
+---
+import { Image as AstroImage } from 'astro:assets';
+import type { Locales } from 'astro';
+import { format } from 'date-fns';
+import type { BlogPageFragment } from '../../../../__generated/sdk';
+import { getOptimizelySdk } from '../../../graphql/getSdk';
+import type { ContentPayload } from '../../../graphql/shared/ContentPayload';
+import Layout from '../../../layouts/Layout.astro';
+import { isEditContext } from '../../shared/utils.ts';
+
+const isCmsEdit = isEditContext(Astro.url);
+
+export interface Props {
+    contentPayload: ContentPayload;
+}
+const { contentPayload } = Astro.props as Props;
+
+const optiResponse = await getOptimizelySdk(contentPayload).pageById({
+    key: contentPayload.key,
+    //@ts-ignore
+    loc: contentPayload.loc as Locales,
+    ver: contentPayload.ver,
+});
+const post = optiResponse?._Page?.item as BlogPageFragment;
+
+
+const publishedDate = format(
+    new Date(post?._metadata?.published ?? Date.now()),
+    'MMMM dd, yyyy'
+);
+
+const defaultUrl = post?._metadata?.url?.default || '';
+const hierarchicalUrl = post?._metadata?.url?.type === "SIMPLE" ? post?._metadata?.url?.hierarchical : '';
+const extPreviewEnabled = post?.PageAdminSettings?.EnableExternalPreview ?? false;
+---
+
+<Layout
+    title={post?.Title ?? post?._metadata?.displayName ?? 'Blog Post'}
+    description={post?.Subtitle ?? ''}
+    graphtype="article"
+    indexing={false}
+    contentPayload={contentPayload}
+    defaultUrl={defaultUrl}
+    hierarchicalUrl={hierarchicalUrl ?? ''}
+    extPreviewEnabled={extPreviewEnabled}
+>
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <article class="py-12">
+            <!-- Article Header -->
+            <header class="text-center mb-12">
+                <!-- Title -->
+                <h1 
+                    class="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight"
+                    data-epi-edit={isCmsEdit ? "Title" : undefined}
+                >
+                    {post?.Title}
+                </h1>
+                
+                <!-- Subtitle -->
+                {post?.Subtitle && (
+                    <p 
+                        class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-8"
+                        data-epi-edit={isCmsEdit ? "Subtitle" : undefined}
+                    >
+                        {post.Subtitle}
+                    </p>
+                )}
+                
+                <!-- Date -->
+                <div class="flex items-center justify-center space-x-6 text-gray-600 mb-8">
+                    <time 
+                        class="text-gray-600"
+                        datetime={post?._metadata?.published}
+                    >
+                        {publishedDate}
+                    </time>
+                </div>
+            </header>
+            
+            <!-- Article Content -->
+            <div 
+                class="prose prose-lg prose-gray max-w-none mx-auto"
+                style="
+                    /* Custom prose styling inspired by the clean blog aesthetic */
+                    --tw-prose-body: theme(colors.gray.700);
+                    --tw-prose-headings: theme(colors.gray.900);
+                    --tw-prose-links: theme(colors.blue.600);
+                    --tw-prose-bold: theme(colors.gray.900);
+                    --tw-prose-counters: theme(colors.gray.500);
+                    --tw-prose-bullets: theme(colors.gray.400);
+                    --tw-prose-quotes: theme(colors.gray.900);
+                    --tw-prose-quote-borders: theme(colors.gray.300);
+                "
+            >
+                <div 
+                    data-epi-edit={isCmsEdit ? "Body" : undefined}
+                    set:html={post.Body?.html}
+                />
+            </div>
+        </article>
+    </div>
+</Layout>

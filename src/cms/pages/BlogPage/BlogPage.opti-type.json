@@ -1,0 +1,57 @@
+{
+	"key": "BlogPage",
+	"displayName": "Blog Page",
+	"description": "",
+	"baseType": "page",
+	"sortOrder": 0,
+	"mayContainTypes": [
+		"*"
+	],
+	"mediaFileExtensions": [],
+	"compositionBehaviors": [],
+	"properties": {
+		"Title": {
+			"type": "string",
+			"format": "shortString",
+			"displayName": "Title",
+			"description": "",
+			"localized": false,
+			"required": true,
+			"group": "Information",
+			"sortOrder": 0,
+			"editorSettings": {}
+		},
+		"Subtitle": {
+			"type": "string",
+			"displayName": "Subtitle",
+			"description": "",
+			"localized": false,
+			"required": true,
+			"group": "Information",
+			"sortOrder": 0,
+			"editorSettings": {}
+		},
+		"Body": {
+			"type": "string",
+			"format": "html",
+			"displayName": "Body",
+			"description": "",
+			"localized": false,
+			"required": true,
+			"group": "Information",
+			"sortOrder": 0,
+			"editorSettings": {}
+		},
+		"PageAdminSettings": {
+			"type": "component",
+			"contentType": "PageAdminSettings",
+			"displayName": "Page Admin Settings",
+			"description": "",
+			"localized": false,
+			"required": false,
+			"group": "AdminSettings",
+			"sortOrder": 0,
+			"editorSettings": {}
+		}
+	}
+}

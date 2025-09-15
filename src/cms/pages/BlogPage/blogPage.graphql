@@ -6,6 +6,9 @@ fragment BlogPage on BlogPage {
     }
     Title
     Subtitle
+    Image {
+        ...ContentUrl
+    }
     Body {
         html
     }

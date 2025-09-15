@@ -77,6 +77,21 @@ const extPreviewEnabled = post?.PageAdminSettings?.EnableExternalPreview ?? fals
                 </div>
             </header>
             
+            <!-- Full-width Image -->
+            {post?.Image?.url?.default && (
+                <div class="w-full mb-12 -mx-4 sm:-mx-6 lg:-mx-8">
+                    <AstroImage
+                        src={post.Image.url.default}
+                        alt={post?.Title || 'Blog post image'}
+                        class="w-full h-64 sm:h-80 md:h-96 lg:h-[28rem] object-cover"
+                        width={1200}
+                        height={600}
+                        loading="eager"
+                        data-epi-edit={isCmsEdit ? "Image" : undefined}
+                    />
+                </div>
+            )}
+            
             <!-- Article Content -->
             <div 
                 class="prose prose-lg prose-gray max-w-none mx-auto"

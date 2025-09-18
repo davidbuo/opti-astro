@@ -1,0 +1,12 @@
+fragment BlogPageExcerpt on BlogPage {
+    _metadata {
+        ...PageUrl
+        published
+        key
+    }
+    Title
+    Subtitle
+    Image {
+        ...ContentUrl
+    }
+}

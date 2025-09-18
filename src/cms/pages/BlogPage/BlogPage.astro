@@ -23,6 +23,35 @@ const optiResponse = await getOptimizelySdk(contentPayload).pageById({
 });
 const post = optiResponse?._Page?.item as BlogPageFragment;
 
+// Enhanced debug for locale-specific image analysis
+console.log('=== Enhanced BlogPage Debug ===');
+console.log('contentPayload:', JSON.stringify(contentPayload, null, 2));
+console.log('GraphQL query params:');
+console.log('  key:', contentPayload.key);
+console.log('  loc:', contentPayload.loc);
+console.log('  ver:', contentPayload.ver);
+console.log('optiResponse exists:', !!optiResponse);
+console.log('optiResponse._Page exists:', !!optiResponse?._Page);
+console.log('optiResponse._Page.item exists:', !!optiResponse?._Page?.item);
+if (post) {
+    console.log('Post data found:');
+    console.log('  Title:', post.Title);
+    console.log('  Subtitle:', post.Subtitle);
+    console.log('  _metadata.key:', post._metadata?.key);
+    console.log('  _metadata.types:', post._metadata?.types);
+    console.log('  Image exists:', !!post.Image);
+    if (post.Image) {
+        console.log('  Image structure:', JSON.stringify(post.Image, null, 2));
+        console.log('  Image.url exists:', !!post.Image.url);
+        console.log('  Image.url.default:', post.Image.url?.default);
+    } else {
+        console.log('  Image is null/undefined');
+    }
+} else {
+    console.log('No post data found in response');
+    console.log('Full optiResponse:', JSON.stringify(optiResponse, null, 2));
+}
+console.log('================================');
 
 const publishedDate = format(
     new Date(post?._metadata?.published ?? Date.now()),

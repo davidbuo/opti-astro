@@ -1,0 +1,20 @@
+query getBlogs(
+    $loc: [Locales]
+    $limit: Int! = 100
+    $status: String! = "Published"
+) {
+    BlogPage(
+        locale: $loc
+        orderBy: { _metadata: { published: DESC } }
+        limit: $limit
+        where: {
+            _metadata: { 
+                status: { eq: $status }
+            }
+        }
+    ) {
+        items {
+            ...BlogPageExcerpt
+        }
+    }
+}

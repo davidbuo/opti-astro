@@ -1,0 +1,14 @@
+fragment BlogContainer on BlogContainer {
+    _metadata {
+        ...PageUrl
+        published
+        displayName
+    }
+    Title
+    FeaturedBlog {
+        key
+    }
+    SeoSettings {
+        ...PageSeoSettingsProperty
+    }
+}

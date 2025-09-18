@@ -1,0 +1,306 @@
+---
+import { Image as AstroImage } from 'astro:assets';
+import type { Locales } from 'astro';
+import { format } from 'date-fns';
+import type { BlogContainerFragment, BlogPageFragment } from '../../../../__generated/sdk';
+import { getOptimizelySdk } from '../../../graphql/getSdk';
+import type { ContentPayload } from '../../../graphql/shared/ContentPayload';
+import Layout from '../../../layouts/Layout.astro';
+import { isEditContext } from '../../shared/utils.ts';
+
+const isCmsEdit = isEditContext(Astro.url);
+
+export interface Props {
+    contentPayload: ContentPayload;
+}
+const { contentPayload } = Astro.props as Props;
+
+// Fetch the BlogContainer page data
+const containerResponse = await getOptimizelySdk(contentPayload).pageById({
+    key: contentPayload.key,
+    //@ts-ignore
+    loc: contentPayload.loc as Locales,
+    ver: contentPayload.ver,
+});
+const container = containerResponse?._Page?.item as BlogContainerFragment;
+
+// Fetch all BlogPage items
+const blogsResponse = await getOptimizelySdk(contentPayload).getBlogs({
+    loc: [contentPayload.loc as Locales],
+    limit: 100,
+});
+
+// Get all blog pages and sort by published date (newest first)
+const allBlogs = (blogsResponse?.BlogPage?.items || []) as BlogPageFragment[];
+const sortedBlogs = allBlogs.sort((a, b) => {
+    const dateA = new Date(a._metadata?.published || 0).getTime();
+    const dateB = new Date(b._metadata?.published || 0).getTime();
+    return dateB - dateA;
+});
+
+// Get featured blog if set
+const featuredBlogKey = container?.FeaturedBlog?.key;
+const featuredBlog = featuredBlogKey 
+    ? sortedBlogs.find(blog => blog._metadata?.key === featuredBlogKey)
+    : sortedBlogs[0]; // Use most recent if no featured blog is set
+
+// Filter out featured blog from the list
+const otherBlogs = sortedBlogs.filter(blog => blog._metadata?.key !== featuredBlog?._metadata?.key);
+
+const defaultUrl = container?._metadata?.url?.default || '';
+const hierarchicalUrl = container?._metadata?.url?.type === "SIMPLE" ? container?._metadata?.url?.hierarchical : '';
+
+// Extract unique categories from blog metadata (using tags or custom logic)
+// Since BlogPage doesn't have a category field, we'll use placeholder categories
+const categories = ['Living Room', 'Kitchen', 'Dining', 'Interior', 'Bedroom'];
+---
+
+<Layout
+    title={container?.Title ?? container?._metadata?.displayName ?? 'Blog'}
+    description={container?.SeoSettings?.MetaDescription ?? ''}
+    graphtype="website"
+    indexing={true}
+    contentPayload={contentPayload}
+    defaultUrl={defaultUrl}
+    hierarchicalUrl={hierarchicalUrl ?? ''}
+>
+    <div class="min-h-screen bg-base-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Page Header -->
+            <header class="py-12 text-center">
+                <h1 
+                    class="text-5xl font-bold tracking-tight"
+                    data-epi-edit={isCmsEdit ? "Title" : undefined}
+                >
+                    {container?.Title || 'BLOG'}
+                </h1>
+            </header>
+
+            <!-- Featured Blog Card -->
+            {featuredBlog && (
+                <section class="mb-12">
+                    <a 
+                        href={featuredBlog._metadata?.url?.default || '#'}
+                        class="block group"
+                    >
+                        <div class="rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow" style="background-color: rgba(232, 213, 183, 0.15);">
+                            {/* Featured Image */}
+                            {featuredBlog.Image?.url?.default ? (
+                                <div class="relative h-[400px] bg-accent/20">
+                                    <AstroImage
+                                        src={featuredBlog.Image.url.default}
+                                        alt={featuredBlog.Title || 'Featured blog image'}
+                                        class="w-full h-full object-cover"
+                                        width={1200}
+                                        height={400}
+                                        loading="eager"
+                                    />
+                                </div>
+                            ) : (
+                                <div class="h-[400px] bg-accent/20 rounded-t-2xl" />
+                            )}
+                            
+                            {/* Featured Content */}
+                            <div class="p-8 text-center">
+                                <h2 class="text-3xl font-semibold mb-3">
+                                    {featuredBlog.Title}
+                                </h2>
+                                <div class="flex items-center justify-center gap-4 text-sm text-base-content/60 mb-4">
+                                    <time>
+                                        {format(new Date(featuredBlog._metadata?.published || Date.now()), 'MMMM d, yyyy')}
+                                    </time>
+                                    <span>•</span>
+                                    <span>Living Room</span>
+                                </div>
+                                {featuredBlog.Subtitle && (
+                                    <p class="text-base text-base-content/70 max-w-2xl mx-auto">
+                                        {featuredBlog.Subtitle}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    </a>
+                </section>
+            )}
+
+            {/* Search and Filter Section */}
+            <section class="mb-12" x-data={`{
+                searchQuery: '',
+                selectedCategory: 'All Categories',
+                categories: ${JSON.stringify(['All Categories', ...categories])},
+                blogs: ${JSON.stringify(otherBlogs.map((blog, index) => ({
+                    id: index,
+                    title: blog.Title || '',
+                    subtitle: blog.Subtitle || '',
+                    url: blog._metadata?.url?.default || '#',
+                    image: blog.Image?.url?.default || null,
+                    date: blog._metadata?.published || new Date().toISOString(),
+                    category: categories[index % categories.length] || 'Interior',
+                    visible: true
+                })))},
+                filterBlogs() {
+                    this.blogs = this.blogs.map(blog => {
+                        const matchesSearch = this.searchQuery === '' || 
+                            blog.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                            blog.subtitle.toLowerCase().includes(this.searchQuery.toLowerCase());
+                        const matchesCategory = this.selectedCategory === 'All Categories' || 
+                            blog.category === this.selectedCategory;
+                        blog.visible = matchesSearch && matchesCategory;
+                        return blog;
+                    });
+                }
+            }`}>
+                <div class="flex flex-col md:flex-row gap-4">
+                    {/* Category Dropdown */}
+                    <div class="relative">
+                        <select 
+                            x-model="selectedCategory" 
+                            @change="filterBlogs()"
+                            class="select select-bordered w-full md:w-auto bg-white"
+                        >
+                            <template x-for="category in categories" :key="category">
+                                <option x-text="category"></option>
+                            </template>
+                        </select>
+                    </div>
+                    
+                    {/* Search Bar */}
+                    <div class="flex-1 relative">
+                        <input 
+                            type="text" 
+                            x-model="searchQuery"
+                            @input="filterBlogs()"
+                            placeholder="Search" 
+                            class="input input-bordered w-full bg-white pl-4 pr-10"
+                        />
+                        <svg class="absolute right-3 top-3.5 h-5 w-5 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+
+                {/* Blog Posts Grid */}
+                <div class="grid md:grid-cols-2 gap-8 mt-12">
+                    <template x-for="blog in blogs" :key="blog.id">
+                        <article x-show="blog.visible" x-transition class="group">
+                            <a 
+                                :href="blog.url"
+                                class="block rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow" style="background-color: rgba(232, 213, 183, 0.15);"
+                            >
+                                {/* Blog Image */}
+                                <template x-if="blog.image">
+                                    <div class="relative h-56 bg-accent/20">
+                                        <img 
+                                            :src="blog.image"
+                                            :alt="blog.title"
+                                            class="w-full h-full object-cover"
+                                            loading="lazy"
+                                        />
+                                    </div>
+                                </template>
+                                <template x-if="!blog.image">
+                                    <div class="h-56 bg-accent/20"></div>
+                                </template>
+                                
+                                {/* Blog Content */}
+                                <div class="p-6">
+                                    <h3 class="text-xl font-semibold mb-2" x-text="blog.title"></h3>
+                                    <div class="flex items-center gap-3 text-sm text-base-content/60 mb-3">
+                                        <time x-text="new Date(blog.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: blog.date.slice(0,4) !== new Date().getFullYear().toString() ? 'numeric' : undefined })"></time>
+                                        <span x-text="blog.category"></span>
+                                    </div>
+                                    <p class="text-base-content/70" x-text="blog.subtitle"></p>
+                                </div>
+                            </a>
+                        </article>
+                    </template>
+                </div>
+
+                {/* No Results Message */}
+                <div x-show="blogs.filter(b => b.visible).length === 0" class="text-center py-16">
+                    <p class="text-base-content/60">No blog posts found matching your criteria.</p>
+                </div>
+
+                {/* Static fallback for non-JS users */}
+                <noscript>
+                    <div class="grid md:grid-cols-2 gap-8 mt-12">
+                        {otherBlogs.map((blog, index) => (
+                            <article class="group">
+                                <a 
+                                    href={blog._metadata?.url?.default || '#'}
+                                    class="block rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow" style="background-color: rgba(232, 213, 183, 0.15);"
+                                >
+                                    {/* Blog Image */}
+                                    {blog.Image?.url?.default ? (
+                                        <div class="relative h-56 bg-accent/20">
+                                            <AstroImage
+                                                src={blog.Image.url.default}
+                                                alt={blog.Title || 'Blog image'}
+                                                class="w-full h-full object-cover"
+                                                width={600}
+                                                height={300}
+                                                loading="lazy"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div class="h-56 bg-accent/20" />
+                                    )}
+                                    
+                                    {/* Blog Content */}
+                                    <div class="p-6">
+                                        <h3 class="text-xl font-semibold mb-2">
+                                            {blog.Title}
+                                        </h3>
+                                        <div class="flex items-center gap-3 text-sm text-base-content/60 mb-3">
+                                            <time>
+                                                {format(new Date(blog._metadata?.published || Date.now()), 'MMM d')}
+                                            </time>
+                                            <span>{categories[index % categories.length]}</span>
+                                        </div>
+                                        {blog.Subtitle && (
+                                            <p class="text-base-content/70">
+                                                {blog.Subtitle}
+                                            </p>
+                                        )}
+                                    </div>
+                                </a>
+                            </article>
+                        ))}
+                    </div>
+                </noscript>
+            </section>
+
+            {/* Pagination */}
+            {otherBlogs.length > 10 && (
+                <div class="flex justify-center py-8">
+                    <button class="btn btn-outline">Next →</button>
+                </div>
+            )}
+
+            {/* Newsletter Section */}
+            <section class="bg-accent/20 rounded-2xl p-8 md:p-12 my-16">
+                <div class="max-w-2xl mx-auto">
+                    <h2 class="text-2xl font-semibold mb-3">Subscribe to our newsletter</h2>
+                    <p class="text-base-content/70 mb-6">
+                        The latest updates, design tips, and more delivered straight to your inbox.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <input 
+                            type="email" 
+                            placeholder="Enter your email" 
+                            class="input input-bordered flex-1 bg-white"
+                        />
+                        <button class="btn btn-primary">Subscribe</button>
+                    </div>
+                </div>
+            </section>
+
+            {/* Empty State */}
+            {!featuredBlog && otherBlogs.length === 0 && (
+                <div class="text-center py-16">
+                    <p class="text-base-content/60 text-lg">No blog posts available yet.</p>
+                </div>
+            )}
+        </div>
+    </div>
+</Layout>

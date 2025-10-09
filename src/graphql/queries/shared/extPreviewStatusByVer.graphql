@@ -22,6 +22,11 @@ query extPreviewStatusByVer($ver: String) {
                     EnableExternalPreview
                 }
             }
+            ... on BlogPage {
+                PageAdminSettings {
+                    EnableExternalPreview
+                }
+            }
         }
     }
 }

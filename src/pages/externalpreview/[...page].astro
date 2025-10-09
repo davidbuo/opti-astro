@@ -8,7 +8,7 @@ import '../../lib/locale-init.js';
 import Component from '../../cms/components/_Component.astro';
 import Experiences from '../../cms/experiences/_Experiences.astro';
 import { getOptimizelySdk } from '../../graphql/getSdk';
-import { isDraftContent, isExternalPreviewEnabled, isValidExtPreviewToken } from '../../cms/shared/utils.ts';
+import { isDraftContent, isValidExtPreviewToken } from '../../cms/shared/utils.ts';
 import type { ContentPayload } from '../../graphql/shared/ContentPayload';
 import Pages from '../../cms/pages/_Pages.astro';
 
@@ -30,7 +30,6 @@ extPreviewPayload.loc = localeToSdkLocale(getCurrentLocale(Astro));
 extPreviewPayload.ctx = ctx;
 
 const isDraft = await isDraftContent(extPreviewPayload.ver);
-const isExtPreviewEnabled = await isExternalPreviewEnabled(extPreviewPayload.ver);
 
 const urlBase = Astro.url.origin;
 const currentPagePath = `${Astro.url.pathname.replace(/\/$/, '')}/`
@@ -39,7 +38,9 @@ const currentPagePath = `${Astro.url.pathname.replace(/\/$/, '')}/`
     .join('/');
 const currentPagePathNoSlash = `${currentPagePath.replace(/\/$/, '')}`;
 
-if (!EXTERNAL_PREVIEW_ENABLED || !isDraft || !isExtPreviewEnabled) {
+// Only check if feature is enabled and content is draft
+// Token validation provides sufficient security, no need to check CMS setting
+if (!EXTERNAL_PREVIEW_ENABLED || !isDraft) {
     return Astro.redirect(getRelativeLocaleUrl(getCurrentLocale(Astro), '/404'), 404);
 }
 

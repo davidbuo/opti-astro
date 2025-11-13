@@ -1,7 +1,8 @@
 ---
 import { Font } from 'astro:assets';
-import { ASTRO_TRANSITIONS_ENABLED, OPTIMIZELY_FX_SDK_KEY } from 'astro:env/client';
+import { ASTRO_TRANSITIONS_ENABLED } from 'astro:env/client';
 import { ClientRouter } from 'astro:transitions';
+import { OPTIMIZELY_FX_SDK_KEY } from 'astro:env/server';
 
 import type { Locales } from '../../__generated/sdk';
 import Footer from '../cms/shared/Footer.astro';
@@ -156,8 +157,8 @@ const contentKey = contentPayload.key || '';
         })()}
         {OPTIMIZELY_FX_SDK_KEY && !isCmsEdit && (
             <>
-                <script src="https://unpkg.com/@optimizely/optimizely-sdk@6/dist/optimizely.browser.umd.min.js"></script>
-                <script src={`https://cdn.optimizely.com/datafiles/${OPTIMIZELY_FX_SDK_KEY}.json/tag.js`}></script>
+                <script is:inline src="https://unpkg.com/@optimizely/optimizely-sdk@6/dist/optimizely.browser.umd.min.js"></script>
+                <script is:inline src={`https://cdn.optimizely.com/datafiles/${OPTIMIZELY_FX_SDK_KEY}.json/tag.js`}></script>
                 <script is:inline define:vars={{ fxSdkKey: OPTIMIZELY_FX_SDK_KEY }}>
                     // Initialize Optimizely Feature Experimentation SDK v6
                     if (window.optimizelySdk && fxSdkKey && window.optimizelyDatafile) {

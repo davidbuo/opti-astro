@@ -144,16 +144,19 @@ const extPreviewEnabled = post?.PageAdminSettings?.EnableExternalPreview ?? fals
             </div>
 
             <!-- Main Content Area -->
-            {post?.MainContentArea && post.MainContentArea.length > 0 && (
-                <div class="mt-12 mx-auto justify-start p-2 sm:p-3 md:p-4 flex gap-8 overflow-x-auto flex-wrap">
-                    {post.MainContentArea.map((contentAreaItem: any) => (
+            {(post?.MainContentArea && post.MainContentArea.length > 0) || isCmsEdit ? (
+                <div
+                    class="mt-12 mx-auto justify-start p-2 sm:p-3 md:p-4 flex gap-8 overflow-x-auto flex-wrap"
+                    data-epi-edit={isCmsEdit ? "MainContentArea" : undefined}
+                >
+                    {post?.MainContentArea?.map((contentAreaItem: any) => (
                         <ContentArea
                             contentPayload={contentPayload}
                             contentAreaItem={contentAreaItem}
                         />
                     ))}
                 </div>
-            )}
+            ) : null}
         </article>
     </div>
 </Layout>

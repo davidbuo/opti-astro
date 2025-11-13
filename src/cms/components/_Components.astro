@@ -3,6 +3,7 @@ import type { ContentPayload } from '../../graphql/shared/ContentPayload';
 import ArticlePageCard from '../pages/ArticlePage/ArticlePageCard.astro';
 import ArticleList from './ArticleListComponent/ArticleList.astro';
 import Button from './ButtonComponent/Button.astro';
+import Calculator from './CalculatorComponent/Calculator.astro';
 import CallToAction from './CallToActionComponent/CallToAction.astro';
 import Card from './CardComponent/Card.astro';
 import Carousel from './CarouselComponent/Carousel.astro';
@@ -146,6 +147,17 @@ const componentType = component._metadata.types[0];
 {
     componentType === 'Button' && (
         <Button
+            key={data?.key}
+            contentPayload={contentPayload}
+            data={component}
+            displaySettings={displaySettings}
+            displayTemplateKey={displayTemplateKey}
+        />
+    )
+}
+{
+    componentType === 'Calculator' && (
+        <Calculator
             key={data?.key}
             contentPayload={contentPayload}
             data={component}

@@ -172,7 +172,7 @@ const contentKey = contentPayload.key || '';
                             sdkKey: fxSdkKey,
                             datafile: window.optimizelyDatafile,
                             autoUpdate: true,
-                            updateInterval: 60000 // 1 minute
+                            updateInterval: 5000 // 5 seconds for faster updates
                         });
 
                         const batchEventProcessor = createBatchEventProcessor();

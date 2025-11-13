@@ -1,0 +1,325 @@
+---
+import type {
+    CalculatorFragment,
+    DisplaySettingsFragment,
+} from '../../../../__generated/sdk';
+import type { ContentPayload } from '../../../graphql/shared/ContentPayload';
+import { isEditContext } from '../../shared/utils.ts';
+
+const isCmsEdit = isEditContext(Astro.url);
+
+export interface Props {
+    key: string;
+    data: CalculatorFragment;
+    displaySettings: DisplaySettingsFragment[];
+    displayTemplateKey: string;
+    contentPayload: ContentPayload;
+}
+
+const { key, data } = Astro.props as Props;
+
+// Optimizely Feature Experimentation Flag Name: calculator_enhanced_features
+// Variables:
+// - show_amortization_schedule (boolean): Shows detailed amortization schedule
+// - show_comparison_tool (boolean): Shows comparison with other loan options
+// - monthly_payment_calculation_method (string): "standard" or "enhanced" (includes fees)
+---
+
+<div class="calculator-container max-w-4xl mx-auto p-6 bg-base-100 rounded-lg shadow-lg" data-epi-block-id={isCmsEdit && key || undefined}>
+    {data.Title && (
+        <h2 class="text-3xl font-bold mb-6 text-center">{data.Title}</h2>
+    )}
+
+    <div
+        x-data={`{
+            // Input values
+            loanAmount: 2000000,
+            downPayment: 500000,
+            interestRate: 4.5,
+            loanTerm: 25,
+
+            // Feature flag state (will be set by Optimizely)
+            showAmortizationSchedule: false,
+            showComparisonTool: false,
+            calculationMethod: 'standard',
+
+            // Calculated values
+            get propertyPrice() {
+                return parseInt(this.loanAmount) + parseInt(this.downPayment);
+            },
+
+            get loanToValue() {
+                return ((this.loanAmount / this.propertyPrice) * 100).toFixed(1);
+            },
+
+            get monthlyInterestRate() {
+                return this.interestRate / 100 / 12;
+            },
+
+            get numberOfPayments() {
+                return this.loanTerm * 12;
+            },
+
+            get monthlyPayment() {
+                const r = this.monthlyInterestRate;
+                const n = this.numberOfPayments;
+                const p = this.loanAmount;
+
+                if (r === 0) return p / n;
+
+                const monthlyPayment = p * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+
+                // Enhanced calculation includes admin fees
+                if (this.calculationMethod === 'enhanced') {
+                    const adminFee = 50; // SEK per month
+                    return monthlyPayment + adminFee;
+                }
+
+                return monthlyPayment;
+            },
+
+            get totalAmount() {
+                return this.monthlyPayment * this.numberOfPayments;
+            },
+
+            get totalInterest() {
+                return this.totalAmount - this.loanAmount;
+            },
+
+            get amortizationSchedule() {
+                if (!this.showAmortizationSchedule) return [];
+
+                const schedule = [];
+                let balance = parseFloat(this.loanAmount);
+                const monthlyPayment = this.monthlyPayment;
+                const monthlyRate = this.monthlyInterestRate;
+
+                // Generate first 12 months
+                for (let i = 1; i <= 12 && balance > 0; i++) {
+                    const interestPayment = balance * monthlyRate;
+                    const principalPayment = monthlyPayment - interestPayment;
+                    balance -= principalPayment;
+
+                    schedule.push({
+                        month: i,
+                        payment: monthlyPayment,
+                        principal: principalPayment,
+                        interest: interestPayment,
+                        balance: Math.max(0, balance)
+                    });
+                }
+
+                return schedule;
+            },
+
+            formatCurrency(amount) {
+                return new Intl.NumberFormat('sv-SE', {
+                    style: 'currency',
+                    currency: 'SEK',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(amount);
+            },
+
+            init() {
+                // Initialize Optimizely Feature Experimentation
+                if (window.optimizely) {
+                    const user = { id: 'user_' + Date.now() };
+
+                    // Get feature flag decisions
+                    const decision = window.optimizely.decide('calculator_enhanced_features');
+
+                    if (decision.enabled) {
+                        this.showAmortizationSchedule = decision.variables.show_amortization_schedule || false;
+                        this.showComparisonTool = decision.variables.show_comparison_tool || false;
+                        this.calculationMethod = decision.variables.monthly_payment_calculation_method || 'standard';
+
+                        console.log('Calculator feature flag enabled:', {
+                            showAmortizationSchedule: this.showAmortizationSchedule,
+                            showComparisonTool: this.showComparisonTool,
+                            calculationMethod: this.calculationMethod
+                        });
+                    }
+                }
+            }
+        }`}
+        class="space-y-6"
+    >
+        <!-- Input Form -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Loan Amount -->
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text font-semibold">Lånebelopp (SEK)</span>
+                </label>
+                <input
+                    type="number"
+                    x-model.number="loanAmount"
+                    step="100000"
+                    min="0"
+                    class="input input-bordered w-full"
+                    placeholder="2 000 000"
+                />
+                <label class="label">
+                    <span class="label-text-alt" x-text="formatCurrency(loanAmount)"></span>
+                </label>
+            </div>
+
+            <!-- Down Payment -->
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text font-semibold">Kontantinsats (SEK)</span>
+                </label>
+                <input
+                    type="number"
+                    x-model.number="downPayment"
+                    step="50000"
+                    min="0"
+                    class="input input-bordered w-full"
+                    placeholder="500 000"
+                />
+                <label class="label">
+                    <span class="label-text-alt" x-text="formatCurrency(downPayment)"></span>
+                </label>
+            </div>
+
+            <!-- Interest Rate -->
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text font-semibold">Ränta (%)</span>
+                </label>
+                <input
+                    type="number"
+                    x-model.number="interestRate"
+                    step="0.1"
+                    min="0"
+                    max="20"
+                    class="input input-bordered w-full"
+                    placeholder="4.5"
+                />
+                <label class="label">
+                    <span class="label-text-alt" x-text="interestRate + '%'"></span>
+                </label>
+            </div>
+
+            <!-- Loan Term -->
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text font-semibold">Löptid (år)</span>
+                </label>
+                <input
+                    type="number"
+                    x-model.number="loanTerm"
+                    step="1"
+                    min="1"
+                    max="50"
+                    class="input input-bordered w-full"
+                    placeholder="25"
+                />
+                <label class="label">
+                    <span class="label-text-alt" x-text="loanTerm + ' år'"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div class="divider"></div>
+
+        <div class="bg-base-200 p-6 rounded-lg">
+            <h3 class="text-2xl font-bold mb-4">Dina resultat</h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="stat bg-base-100 rounded-lg shadow">
+                    <div class="stat-title">Månadskostnad</div>
+                    <div class="stat-value text-primary" x-text="formatCurrency(monthlyPayment)"></div>
+                    <div class="stat-desc" x-show="calculationMethod === 'enhanced'">Inkl. avgifter</div>
+                </div>
+
+                <div class="stat bg-base-100 rounded-lg shadow">
+                    <div class="stat-title">Total kostnad</div>
+                    <div class="stat-value text-2xl" x-text="formatCurrency(totalAmount)"></div>
+                    <div class="stat-desc">Över <span x-text="loanTerm"></span> år</div>
+                </div>
+
+                <div class="stat bg-base-100 rounded-lg shadow">
+                    <div class="stat-title">Total ränta</div>
+                    <div class="stat-value text-2xl" x-text="formatCurrency(totalInterest)"></div>
+                </div>
+
+                <div class="stat bg-base-100 rounded-lg shadow">
+                    <div class="stat-title">Belåningsgrad</div>
+                    <div class="stat-value text-2xl" x-text="loanToValue + '%'"></div>
+                    <div class="stat-desc" x-show="loanToValue > 85" class="text-warning">
+                        ⚠️ Över 85% - högre krav
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Feature: Amortization Schedule -->
+        <div x-show="showAmortizationSchedule" class="mt-6">
+            <div class="divider"></div>
+            <h3 class="text-xl font-bold mb-4">Amorteringsplan (första året)</h3>
+
+            <div class="overflow-x-auto">
+                <table class="table table-zebra w-full">
+                    <thead>
+                        <tr>
+                            <th>Månad</th>
+                            <th>Betalning</th>
+                            <th>Amortering</th>
+                            <th>Ränta</th>
+                            <th>Kvarstående</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="row in amortizationSchedule" :key="row.month">
+                            <tr>
+                                <td x-text="row.month"></td>
+                                <td x-text="formatCurrency(row.payment)"></td>
+                                <td x-text="formatCurrency(row.principal)"></td>
+                                <td x-text="formatCurrency(row.interest)"></td>
+                                <td x-text="formatCurrency(row.balance)"></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Enhanced Feature: Comparison Tool -->
+        <div x-show="showComparisonTool" class="mt-6">
+            <div class="divider"></div>
+            <h3 class="text-xl font-bold mb-4">Jämför olika löptider</h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <template x-for="years in [15, 25, 30]" :key="years">
+                    <div class="card bg-base-200 shadow-lg">
+                        <div class="card-body">
+                            <h4 class="card-title" x-text="years + ' år'"></h4>
+                            <p class="text-sm text-base-content/70">Månadskostnad:</p>
+                            <p class="text-lg font-bold"
+                               x-text="formatCurrency(loanAmount * (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, years * 12)) / (Math.pow(1 + monthlyInterestRate, years * 12) - 1))">
+                            </p>
+                            <p class="text-sm text-base-content/70 mt-2">Total kostnad:</p>
+                            <p class="font-semibold"
+                               x-text="formatCurrency((loanAmount * (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, years * 12)) / (Math.pow(1 + monthlyInterestRate, years * 12) - 1)) * years * 12)">
+                            </p>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Disclaimer -->
+        <div class="alert alert-info mt-6">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <div>
+                <p class="text-sm">
+                    Detta är en ungefärlig beräkning. Faktiska kostnader kan variera beroende på din situation och aktuella villkor.
+                    Kontakta oss för en personlig rådgivning.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,49 @@
+{
+	"key": "BlogContainer",
+	"displayName": "Blog Container",
+	"description": "",
+	"baseType": "page",
+	"sortOrder": 0,
+	"mayContainTypes": [
+		"BlogPage"
+	],
+	"mediaFileExtensions": [],
+	"compositionBehaviors": [],
+	"properties": {
+		"Title": {
+			"type": "string",
+			"displayName": "Title",
+			"description": "",
+			"localized": false,
+			"required": true,
+			"group": "Information",
+			"sortOrder": 0,
+			"editorSettings": {}
+		},
+		"FeaturedBlog": {
+			"type": "contentReference",
+			"displayName": "Featured Blog",
+			"description": "",
+			"localized": false,
+			"required": false,
+			"group": "Information",
+			"sortOrder": 0,
+			"editorSettings": {},
+			"allowedTypes": [
+				"BlogPage"
+			],
+			"restrictedTypes": []
+		},
+		"SeoSettings": {
+			"type": "component",
+			"contentType": "PageSeoSettings",
+			"displayName": "SEO Settings",
+			"description": "",
+			"localized": false,
+			"required": false,
+			"group": "SeoSettings",
+			"sortOrder": 0,
+			"editorSettings": {}
+		}
+	}
+}

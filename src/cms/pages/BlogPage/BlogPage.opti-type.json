@@ -10,38 +10,6 @@
 	"mediaFileExtensions": [],
 	"compositionBehaviors": [],
 	"properties": {
-		"Title": {
-			"type": "string",
-			"format": "shortString",
-			"displayName": "Title",
-			"description": "",
-			"localized": false,
-			"required": true,
-			"group": "Information",
-			"sortOrder": 0,
-			"editorSettings": {}
-		},
-		"Subtitle": {
-			"type": "string",
-			"displayName": "Subtitle",
-			"description": "",
-			"localized": false,
-			"required": true,
-			"group": "Information",
-			"sortOrder": 0,
-			"editorSettings": {}
-		},
-		"Body": {
-			"type": "string",
-			"format": "html",
-			"displayName": "Body",
-			"description": "",
-			"localized": false,
-			"required": true,
-			"group": "Information",
-			"sortOrder": 0,
-			"editorSettings": {}
-		},
 		"PageAdminSettings": {
 			"type": "component",
 			"contentType": "PageAdminSettings",
@@ -52,6 +20,68 @@
 			"group": "AdminSettings",
 			"sortOrder": 0,
 			"editorSettings": {}
+		},
+		"Title": {
+			"type": "string",
+			"format": "shortString",
+			"displayName": "Title",
+			"description": "",
+			"localized": true,
+			"required": true,
+			"group": "Information",
+			"sortOrder": 100,
+			"editorSettings": {}
+		},
+		"Subtitle": {
+			"type": "string",
+			"displayName": "Subtitle",
+			"description": "",
+			"localized": true,
+			"required": true,
+			"group": "Information",
+			"sortOrder": 200,
+			"editorSettings": {}
+		},
+		"Body": {
+			"type": "string",
+			"format": "html",
+			"displayName": "Body",
+			"description": "",
+			"localized": true,
+			"required": true,
+			"group": "Information",
+			"sortOrder": 250,
+			"editorSettings": {}
+		},
+		"Image": {
+			"type": "contentReference",
+			"displayName": "Image",
+			"description": "",
+			"localized": true,
+			"required": false,
+			"group": "Information",
+			"sortOrder": 300,
+			"editorSettings": {},
+			"allowedTypes": [
+				"Image"
+			],
+			"restrictedTypes": []
+		},
+		"MainContentArea": {
+			"type": "array",
+			"displayName": "Main Content Area",
+			"description": "",
+			"localized": false,
+			"required": false,
+			"group": "Information",
+			"sortOrder": 400,
+			"editorSettings": {},
+			"minItems": 0,
+			"items": {
+				"type": "content",
+				"allowedTypes": [],
+				"restrictedTypes": []
+			}
 		}
 	}
 }

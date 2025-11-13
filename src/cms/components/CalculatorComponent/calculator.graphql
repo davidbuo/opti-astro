@@ -1,0 +1,3 @@
+fragment Calculator on Calculator {
+    Title
+}

@@ -12,6 +12,12 @@ fragment BlogPage on BlogPage {
     Body {
         html
     }
+    MainContentArea {
+        _metadata {
+            types
+        }
+        ...ContentArea
+    }
     PageAdminSettings {
         ...PageAdminSettingsProperty
     }

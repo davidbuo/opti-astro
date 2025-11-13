@@ -1,0 +1,7 @@
+{
+	"key": "DefaultCalculator",
+	"displayName": "Calculator Default",
+	"contentType": "Calculator",
+	"isDefault": true,
+	"settings": {}
+}

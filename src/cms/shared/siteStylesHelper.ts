@@ -11,7 +11,7 @@ export function getSiteStyles(siteStyles: any): string {
             });
         }
     }
-    // Colors
+    // Colors - These will override the defaults in global.css
     siteStyles?.primary && styles.push(`--color-primary: ${siteStyles.primary}`);
     siteStyles?.primaryContent && styles.push(`--color-primary-content: ${siteStyles.primaryContent}`);
     siteStyles?.secondary && styles.push(`--color-secondary: ${siteStyles.secondary}`);

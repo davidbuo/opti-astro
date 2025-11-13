@@ -14,6 +14,72 @@ const styles = siteStyles?.SiteStyles?.item;
 
 const stylesList = getSiteStyles(styles);
 const fontStyle = getSiteFont(styles);
+
+// Generate button color overrides when Site Styles colors are defined
+const generateButtonOverrides = (styles: any): string => {
+    if (!styles) return '';
+
+    const overrides: string[] = [];
+
+    // Primary button overrides (btn-primary uses --color-primary)
+    if (styles.primary) {
+        overrides.push(`
+        .btn-primary,
+        a.btn-primary,
+        button.btn-primary {
+            background-color: ${styles.primary} !important;
+            color: ${styles.primaryContent || '#FFFFFF'} !important;
+        }
+        .btn-primary:hover,
+        a.btn-primary:hover,
+        button.btn-primary:hover {
+            background-color: color-mix(in srgb, ${styles.primary} 90%, black) !important;
+            color: ${styles.primaryContent || '#FFFFFF'} !important;
+            box-shadow: 0 6px 16px color-mix(in srgb, ${styles.primary} 30%, transparent) !important;
+        }`);
+    }
+
+    // Secondary button overrides (btn-secondary uses --color-secondary)
+    if (styles.secondary) {
+        overrides.push(`
+        .btn-secondary,
+        a.btn-secondary,
+        button.btn-secondary {
+            background-color: ${styles.secondary} !important;
+            color: ${styles.secondaryContent || '#5D5D5D'} !important;
+        }
+        .btn-secondary:hover,
+        a.btn-secondary:hover,
+        button.btn-secondary:hover {
+            background-color: color-mix(in srgb, ${styles.secondary} 90%, black) !important;
+            color: ${styles.secondaryContent || '#5D5D5D'} !important;
+            box-shadow: 0 6px 16px color-mix(in srgb, ${styles.secondary} 30%, transparent) !important;
+        }`);
+    }
+
+    // Accent button overrides (btn-accent uses --color-accent)
+    if (styles.accent) {
+        overrides.push(`
+        .btn-accent,
+        a.btn-accent,
+        button.btn-accent {
+            background-color: ${styles.accent} !important;
+            color: ${styles.accentContent || '#5D5D5D'} !important;
+        }
+        .btn-accent:hover,
+        a.btn-accent:hover,
+        button.btn-accent:hover {
+            background-color: color-mix(in srgb, ${styles.accent} 90%, black) !important;
+            color: ${styles.accentContent || '#5D5D5D'} !important;
+            box-shadow: 0 6px 16px color-mix(in srgb, ${styles.accent} 30%, transparent) !important;
+        }`);
+    }
+
+    return overrides.join('\n');
+};
+
+const buttonOverrides = generateButtonOverrides(styles);
+
 const stylesCode = fontStyle ?
     `
         :root {
@@ -22,11 +88,13 @@ const stylesCode = fontStyle ?
         body {
             font-family: var(${fontStyle});
         }
-    ` : 
+        ${buttonOverrides}
+    ` :
     `
         :root {
             ${stylesList}
         }
+        ${buttonOverrides}
     `;
 ---
 

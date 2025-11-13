@@ -51,16 +51,23 @@ if (isHoverMode && imageTintLevel !== 'o_0') {
 }
 
 
-const containerClasses = isFullSplit 
+// Determine if this is a text-below or text-above layout (vertical card)
+const isVerticalLayout = DisplayAs === 'textBelowCard' || DisplayAs === 'textAboveCard';
+
+const containerClasses = isFullSplit
     ? 'relative w-full md:w-1/2 min-h-[500px] overflow-hidden'
     : isHoverMode
     ? 'w-full h-full'
+    : isVerticalLayout
+    ? 'w-full overflow-hidden'
     : 'flex justify-center mb-6';
 
 const imageClasses = isFullSplit
     ? 'w-full min-h-[500px] object-cover'
     : isHoverMode
     ? 'w-full h-full object-cover block'
+    : isVerticalLayout
+    ? 'w-full h-64 object-cover'
     : 'w-16 h-16 object-contain';
 
 const finalContainerClasses = [containerClasses];

@@ -1,6 +1,6 @@
 ---
 import { Font } from 'astro:assets';
-import { ASTRO_TRANSITIONS_ENABLED } from 'astro:env/client';
+import { ASTRO_TRANSITIONS_ENABLED, OPTIMIZELY_FX_SDK_KEY } from 'astro:env/client';
 import { ClientRouter } from 'astro:transitions';
 
 import type { Locales } from '../../__generated/sdk';
@@ -154,6 +154,48 @@ const contentKey = contentPayload.key || '';
             }
             return null;
         })()}
+        {OPTIMIZELY_FX_SDK_KEY && !isCmsEdit && (
+            <>
+                <script src="https://unpkg.com/@optimizely/optimizely-sdk@6/dist/optimizely.browser.umd.min.js"></script>
+                <script src={`https://cdn.optimizely.com/datafiles/${OPTIMIZELY_FX_SDK_KEY}.json/tag.js`}></script>
+                <script is:inline define:vars={{ fxSdkKey: OPTIMIZELY_FX_SDK_KEY }}>
+                    // Initialize Optimizely Feature Experimentation SDK v6
+                    if (window.optimizelySdk && fxSdkKey && window.optimizelyDatafile) {
+                        const {
+                            createPollingProjectConfigManager,
+                            createBatchEventProcessor,
+                            createOdpManager
+                        } = window.optimizelySdk;
+
+                        const pollingConfigManager = createPollingProjectConfigManager({
+                            sdkKey: fxSdkKey,
+                            datafile: window.optimizelyDatafile,
+                            autoUpdate: true,
+                            updateInterval: 60000 // 1 minute
+                        });
+
+                        const batchEventProcessor = createBatchEventProcessor();
+                        const odpManager = createOdpManager();
+
+                        window.optimizelyFxClientInstance = window.optimizelySdk.createInstance({
+                            projectConfigManager: pollingConfigManager,
+                            eventProcessor: batchEventProcessor,
+                            odpManager: odpManager
+                        });
+
+                        window.optimizelyFxClientInstance.onReady().then(() => {
+                            console.log('[Optimizely FX] SDK v6 initialized and ready');
+                        }).catch((error) => {
+                            console.error('[Optimizely FX] SDK initialization error:', error);
+                        });
+                    } else {
+                        if (!window.optimizelySdk) console.error('[Optimizely FX] SDK not loaded');
+                        if (!fxSdkKey) console.error('[Optimizely FX] SDK key not provided');
+                        if (!window.optimizelyDatafile) console.error('[Optimizely FX] Datafile not loaded');
+                    }
+                </script>
+            </>
+        )}
         {odpEnabled && (
             <DataPlatform odpPublicKey={odpPublicKey} />
         )}

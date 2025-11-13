@@ -123,23 +123,49 @@ const { key, data } = Astro.props as Props;
 
             init() {
                 // Initialize Optimizely Feature Experimentation
-                if (window.optimizely) {
-                    const user = { id: 'user_' + Date.now() };
+                // Check if Optimizely Feature Experimentation SDK is loaded
+                if (window.optimizelyFxClientInstance) {
+                    try {
+                        // Wait for SDK to be ready
+                        window.optimizelyFxClientInstance.onReady().then(() => {
+                            // Create user context with a random user ID
+                            const userId = 'user_' + Math.random().toString(36).substring(7);
+                            const user = window.optimizelyFxClientInstance.createUserContext(userId);
 
-                    // Get feature flag decisions
-                    const decision = window.optimizely.decide('calculator_enhanced_features');
+                            // Get feature flag decision
+                            const decision = user.decide('calculator_enhanced_features');
 
-                    if (decision.enabled) {
-                        this.showAmortizationSchedule = decision.variables.show_amortization_schedule || false;
-                        this.showComparisonTool = decision.variables.show_comparison_tool || false;
-                        this.calculationMethod = decision.variables.monthly_payment_calculation_method || 'standard';
+                            console.log('[Calculator] Optimizely FX Feature Flag Decision:', decision);
 
-                        console.log('Calculator feature flag enabled:', {
-                            showAmortizationSchedule: this.showAmortizationSchedule,
-                            showComparisonTool: this.showComparisonTool,
-                            calculationMethod: this.calculationMethod
+                            if (decision.enabled) {
+                                this.showAmortizationSchedule = decision.variables.show_amortization_schedule || false;
+                                this.showComparisonTool = decision.variables.show_comparison_tool || false;
+                                this.calculationMethod = decision.variables.monthly_payment_calculation_method || 'standard';
+
+                                console.log('[Calculator] Enhanced features enabled:', {
+                                    showAmortizationSchedule: this.showAmortizationSchedule,
+                                    showComparisonTool: this.showComparisonTool,
+                                    calculationMethod: this.calculationMethod
+                                });
+                            } else {
+                                console.log('[Calculator] Feature flag not enabled');
+                            }
+                        }).catch((error) => {
+                            console.error('[Calculator] Error waiting for Optimizely FX SDK:', error);
                         });
+                    } catch (error) {
+                        console.error('[Calculator] Error accessing Optimizely Feature Experimentation:', error);
                     }
+                } else {
+                    console.log('[Calculator] Optimizely Feature Experimentation SDK not loaded');
+                    console.log('[Calculator] To enable enhanced features:');
+                    console.log('[Calculator] 1. Set OPTIMIZELY_FX_SDK_KEY in your .env file');
+                    console.log('[Calculator] 2. Create the "calculator_enhanced_features" flag in Optimizely');
+                    console.log('[Calculator] 3. Add the flag variables: show_amortization_schedule, show_comparison_tool, monthly_payment_calculation_method');
+                    console.log('[Calculator] For demo purposes, you can manually enable features by setting:');
+                    console.log('[Calculator]   this.showAmortizationSchedule = true;');
+                    console.log('[Calculator]   this.showComparisonTool = true;');
+                    console.log('[Calculator]   this.calculationMethod = "enhanced";');
                 }
             }
         }`}

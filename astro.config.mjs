@@ -139,6 +139,11 @@ export default defineConfig({
                 optional: true,
                 default: true,
             }),
+            OPTIMIZELY_FX_SDK_KEY: envField.string({
+                context: 'client',
+                access: 'public',
+                optional: true,
+            }),
         },
     },
 

@@ -9,6 +9,8 @@ import Card from './CardComponent/Card.astro';
 import Carousel from './CarouselComponent/Carousel.astro';
 import Collapse from './CollapseComponent/Collapse.astro';
 import Divider from './DividerComponent/Divider.astro';
+import FAQBlock from './FAQBlockComponent/FAQBlock.astro';
+import FAQItem from './FAQItemComponent/FAQItem.astro';
 import Grid from './GridComponent/Grid.astro';
 import Hero from './HeroComponent/Hero.astro';
 import Iframe from './IframeComponent/Iframe.astro';
@@ -116,6 +118,26 @@ const componentType = component._metadata.types[0];
 {
     componentType === 'Collapse' && (
         <Collapse
+            key={data?.key}
+            contentPayload={contentPayload}
+            data={component}
+            displaySettings={displaySettings}
+        />
+    )
+}
+{
+    componentType === 'FAQBlock' && (
+        <FAQBlock
+            key={data?.key}
+            contentPayload={contentPayload}
+            data={component}
+            displaySettings={displaySettings}
+        />
+    )
+}
+{
+    componentType === 'FAQItem' && (
+        <FAQItem
             key={data?.key}
             contentPayload={contentPayload}
             data={component}

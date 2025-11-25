@@ -1,0 +1,68 @@
+---
+import type {
+    FaqBlockFragment,
+    DisplaySettingsFragment,
+} from '../../../../__generated/sdk';
+import type { ContentPayload } from '../../../graphql/shared/ContentPayload';
+import { isEditContext } from '../../shared/utils.ts';
+import ContentArea from '../../shared/ContentArea/ContentArea.astro';
+
+const isCmsEdit = isEditContext(Astro.url);
+
+export interface Props {
+    key: string;
+    data: FaqBlockFragment;
+    displaySettings: DisplaySettingsFragment[];
+    contentPayload: ContentPayload;
+}
+const { key, data, contentPayload } = Astro.props as Props;
+
+// Build FAQ schema for SEO
+const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": data?.FAQItems?.map((item: any) => ({
+        "@type": "Question",
+        "name": item?.Question || "",
+        "acceptedAnswer": {
+            "@type": "Answer",
+            "text": item?.Answer?.html?.replace(/<[^>]*>/g, '') || "" // Strip HTML for schema
+        }
+    })) || []
+};
+---
+
+<section
+    class="faq-block py-8 md:py-12 w-full"
+    data-epi-block-id={isCmsEdit && key || undefined}
+>
+    <div class="container mx-auto px-4">
+        {data?.Title && (
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-4 nestly-heading">
+                {data.Title}
+            </h2>
+        )}
+        {data?.Subtitle && (
+            <p class="text-center text-base-content/70 mb-8 text-lg">
+                {data.Subtitle}
+            </p>
+        )}
+
+        <div
+            class="flex flex-col gap-3 max-w-4xl mx-auto"
+            itemscope
+            itemtype="https://schema.org/FAQPage"
+            data-epi-edit={isCmsEdit ? "FAQItems" : undefined}
+        >
+            {data?.FAQItems?.map((contentAreaItem) => (
+                <ContentArea
+                    contentPayload={contentPayload}
+                    contentAreaItem={contentAreaItem}
+                />
+            ))}
+        </div>
+    </div>
+
+    <!-- JSON-LD Schema for SEO -->
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+</section>

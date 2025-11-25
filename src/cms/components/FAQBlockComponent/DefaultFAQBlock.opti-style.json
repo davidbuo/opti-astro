@@ -1,0 +1,7 @@
+{
+    "key": "DefaultFAQBlock",
+    "displayName": "FAQ Block Default",
+    "contentType": "FAQBlock",
+    "isDefault": true,
+    "settings": {}
+}

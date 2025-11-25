@@ -1,0 +1,7 @@
+{
+    "key": "DefaultFAQItem",
+    "displayName": "FAQ Item Default",
+    "contentType": "FAQItem",
+    "isDefault": true,
+    "settings": {}
+}

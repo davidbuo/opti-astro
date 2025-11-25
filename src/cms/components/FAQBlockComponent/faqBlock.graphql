@@ -1,0 +1,11 @@
+fragment FAQBlock on FAQBlock {
+    Title
+    Subtitle
+    FAQItems {
+        _metadata {
+            key
+            types
+        }
+        ...AllComponentsExceptGrid
+    }
+}

@@ -5,6 +5,7 @@
 	"baseType": "page",
 	"sortOrder": 0,
 	"mayContainTypes": [
+		"ArticlePage",
 		"BlogPage"
 	],
 	"mediaFileExtensions": [],

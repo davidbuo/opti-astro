@@ -1,0 +1,50 @@
+---
+import type {
+    FaqItemFragment,
+    DisplaySettingsFragment,
+} from '../../../../__generated/sdk';
+import type { ContentPayload } from '../../../graphql/shared/ContentPayload';
+import { isEditContext } from '../../shared/utils.ts';
+
+const isCmsEdit = isEditContext(Astro.url);
+
+export interface Props {
+    key: string;
+    data: FaqItemFragment;
+    displaySettings: DisplaySettingsFragment[];
+    contentPayload: ContentPayload;
+}
+const { key, data } = Astro.props as Props;
+
+const isHighlighted = data?.isHighlighted ?? false;
+---
+
+<div
+    class:list={[
+        "collapse collapse-arrow bg-base-100 border border-base-300 rounded-lg",
+        isHighlighted && "border-primary border-2"
+    ]}
+    data-epi-block-id={isCmsEdit && key || undefined}
+    itemscope
+    itemprop="mainEntity"
+    itemtype="https://schema.org/Question"
+>
+    <input type="checkbox" class="peer" />
+    <div
+        class:list={[
+            "collapse-title font-semibold",
+            isHighlighted && "text-primary"
+        ]}
+        itemprop="name"
+    >
+        {data?.Question}
+    </div>
+    <div
+        class="collapse-content"
+        itemscope
+        itemprop="acceptedAnswer"
+        itemtype="https://schema.org/Answer"
+    >
+        <div class="prose prose-sm max-w-none" itemprop="text" set:html={data?.Answer?.html} />
+    </div>
+</div>

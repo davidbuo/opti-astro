@@ -1,6 +1,7 @@
 fragment AllComponents on _IComponent {
     ...AllComponentsExceptGrid
     ...Grid # Grid needs to be separated from the rest of the components because of ContentArea and recursive rendering
+    ...FAQBlock # FAQBlock has internal ContentArea, separated like Grid
 }
 
 fragment AllComponentsExceptGrid on _IComponent {
@@ -19,4 +20,5 @@ fragment AllComponentsExceptGrid on _IComponent {
     ...VideoExternal
     ...Divider
     ...OdpForm
+    ...FAQItem
 }

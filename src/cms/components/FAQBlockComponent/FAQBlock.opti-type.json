@@ -1,0 +1,49 @@
+{
+	"key": "FAQBlock",
+	"displayName": "FAQ Block",
+	"description": "Display a list of frequently asked questions with expandable answers, optimized for UX and SEO (FAQ schema).",
+	"baseType": "component",
+	"sortOrder": 0,
+	"mayContainTypes": [],
+	"mediaFileExtensions": [],
+	"compositionBehaviors": [],
+	"properties": {
+		"Title": {
+			"type": "string",
+			"displayName": "Title",
+			"description": "",
+			"localized": false,
+			"required": false,
+			"group": "Information",
+			"sortOrder": -100,
+			"editorSettings": {}
+		},
+		"Subtitle": {
+			"type": "string",
+			"displayName": "Subtitle",
+			"description": "",
+			"localized": false,
+			"required": false,
+			"group": "Information",
+			"sortOrder": 0,
+			"editorSettings": {}
+		},
+		"FAQItems": {
+			"type": "array",
+			"displayName": "FAQ Items",
+			"description": "",
+			"localized": true,
+			"required": false,
+			"group": "Information",
+			"sortOrder": 100,
+			"editorSettings": {},
+			"items": {
+				"type": "content",
+				"allowedTypes": [
+					"FAQItem"
+				],
+				"restrictedTypes": []
+			}
+		}
+	}
+}

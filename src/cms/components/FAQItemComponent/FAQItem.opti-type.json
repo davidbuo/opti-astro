@@ -1,0 +1,43 @@
+{
+	"key": "FAQItem",
+	"displayName": "FAQ Item",
+	"description": "",
+	"baseType": "component",
+	"sortOrder": 0,
+	"mayContainTypes": [],
+	"mediaFileExtensions": [],
+	"compositionBehaviors": [],
+	"properties": {
+		"Question": {
+			"type": "string",
+			"displayName": "Question",
+			"description": "",
+			"localized": false,
+			"required": false,
+			"group": "Information",
+			"sortOrder": -100,
+			"editorSettings": {}
+		},
+		"Answer": {
+			"type": "string",
+			"format": "html",
+			"displayName": "Answer",
+			"description": "",
+			"localized": false,
+			"required": false,
+			"group": "Information",
+			"sortOrder": 0,
+			"editorSettings": {}
+		},
+		"isHighlighted": {
+			"type": "boolean",
+			"displayName": "Highlight",
+			"description": "",
+			"localized": false,
+			"required": false,
+			"group": "Information",
+			"sortOrder": 0,
+			"editorSettings": {}
+		}
+	}
+}

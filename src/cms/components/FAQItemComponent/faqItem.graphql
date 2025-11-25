@@ -1,0 +1,11 @@
+fragment FAQItem on FAQItem {
+    _metadata {
+        key
+        types
+    }
+    Question
+    Answer {
+        html
+    }
+    isHighlighted
+}

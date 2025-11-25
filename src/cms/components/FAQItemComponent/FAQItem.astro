@@ -25,9 +25,6 @@ const isHighlighted = data?.isHighlighted ?? false;
         isHighlighted && "border-primary border-2"
     ]}
     data-epi-block-id={isCmsEdit && key || undefined}
-    itemscope
-    itemprop="mainEntity"
-    itemtype="https://schema.org/Question"
 >
     <input type="checkbox" class="peer" />
     <div
@@ -35,16 +32,10 @@ const isHighlighted = data?.isHighlighted ?? false;
             "collapse-title font-semibold",
             isHighlighted && "text-primary"
         ]}
-        itemprop="name"
     >
         {data?.Question}
     </div>
-    <div
-        class="collapse-content"
-        itemscope
-        itemprop="acceptedAnswer"
-        itemtype="https://schema.org/Answer"
-    >
-        <div class="prose prose-sm max-w-none" itemprop="text" set:html={data?.Answer?.html} />
+    <div class="collapse-content">
+        <div class="prose prose-sm max-w-none" set:html={data?.Answer?.html} />
     </div>
 </div>

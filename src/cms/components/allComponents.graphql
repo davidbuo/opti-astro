@@ -12,6 +12,7 @@ fragment AllComponentsExceptGrid on _IComponent {
     ...Paragraph
     ...Card
     ...Hero
+    ...LeftImageHero
     ...Carousel
     ...Collapse
     ...ArticleList

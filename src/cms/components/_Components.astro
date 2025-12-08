@@ -13,6 +13,7 @@ import FAQBlock from './FAQBlockComponent/FAQBlock.astro';
 import FAQItem from './FAQItemComponent/FAQItem.astro';
 import Grid from './GridComponent/Grid.astro';
 import Hero from './HeroComponent/Hero.astro';
+import LeftImageHero from './LeftImageHeroComponent/LeftImageHero.astro';
 import Iframe from './IframeComponent/Iframe.astro';
 import Image from './ImageComponent/Image.astro';
 import OdpForm from './OdpFormComponent/OdpForm.astro';
@@ -97,6 +98,16 @@ const componentType = component._metadata.types[0];
 {
     componentType === 'Hero' && (
         <Hero
+            key={data?.key}
+            contentPayload={contentPayload}
+            data={component}
+            displaySettings={displaySettings}
+        />
+    )
+}
+{
+    componentType === 'LeftImageHero' && (
+        <LeftImageHero
             key={data?.key}
             contentPayload={contentPayload}
             data={component}

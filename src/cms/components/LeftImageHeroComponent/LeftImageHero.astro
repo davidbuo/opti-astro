@@ -1,0 +1,118 @@
+---
+import { Image as AstroImage } from 'astro:assets';
+import type {
+    DisplaySettingsFragment,
+    LeftImageHeroFragment,
+} from '../../../../__generated/sdk';
+import type { ContentPayload } from '../../../graphql/shared/ContentPayload';
+import { getGlobalStyles } from '../../shared/globalStylesHelper';
+import LinkButton from '../ButtonComponent/LinkButton.astro';
+import { getButtonStyles } from '../ButtonComponent/ButtonStyling';
+import { isEditContext } from '../../shared/utils.ts';
+
+const isCmsEdit = isEditContext(Astro.url);
+
+export interface Props {
+    key: string;
+    data: LeftImageHeroFragment;
+    displaySettings: DisplaySettingsFragment[];
+    contentPayload: ContentPayload;
+}
+const { key, data, displaySettings } = Astro.props as Props;
+const heroButtonStyles = getButtonStyles(displaySettings, false);
+
+const imageUrl = (data?.Image as any)?.item?.Url || data?.Image?.url?.default || null;
+const imageAltText = (data.Image as any)?.item?.AltText || (data.Image as any)?.item?._metadata?.displayName || data.Heading || '';
+
+const videoUrl = (data?.Video as any)?.item?.Url || data?.Video?.url?.default || null;
+const hasVideo = videoUrl !== null;
+
+const globalStyles = getGlobalStyles(displaySettings);
+---
+
+<section
+    class="w-full"
+    class:list={[globalStyles]}
+    data-epi-block-id={isCmsEdit && key || undefined}
+>
+    <div class="grid grid-cols-1 lg:grid-cols-2 min-h-[500px] lg:min-h-[600px]">
+        <!-- Left Column: Image/Video -->
+        <div class="relative w-full h-full min-h-[300px] lg:min-h-full overflow-hidden">
+            {
+                hasVideo && videoUrl && (
+                    <video
+                        autoplay
+                        loop
+                        muted
+                        playsinline
+                        class="absolute inset-0 h-full w-full object-cover"
+                    >
+                        <source src={videoUrl} type="video/mp4" />
+                        Your browser does not support the video tag.
+                    </video>
+                )
+            }
+
+            {
+                !hasVideo && imageUrl && (
+                    <AstroImage
+                        src={imageUrl}
+                        alt={imageAltText}
+                        class="absolute inset-0 h-full w-full object-cover"
+                        inferSize={true}
+                    />
+                )
+            }
+        </div>
+
+        <!-- Right Column: Content -->
+        <div class="flex flex-col items-center justify-center px-8 py-12 lg:px-16 bg-base-100">
+            <div class="max-w-lg text-center">
+                {data?.Heading && (
+                    <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 nestly-heading">
+                        {data.Heading}
+                    </h2>
+                )}
+
+                {data?.SubHeading && (
+                    <p class="text-lg md:text-xl text-base-content/70 mb-6">
+                        {data.SubHeading}
+                    </p>
+                )}
+
+                {data?.Body?.html && (
+                    <div
+                        class="prose prose-lg max-w-none mb-8 text-base-content/80"
+                        set:html={data.Body.html}
+                    />
+                )}
+
+                <!-- CTA Buttons -->
+                {data?.Links && data.Links.length > 0 && (
+                    <div class="flex flex-wrap gap-4 justify-center">
+                        {data.Links.map((link, i) => {
+                            const buttonType: string[] = [""];
+                            switch (i) {
+                                case 0:
+                                    buttonType.push('btn-primary');
+                                    break;
+                                case 1:
+                                    buttonType.push('btn-secondary');
+                                    break;
+                                case 2:
+                                    buttonType.push('btn-accent');
+                                    break;
+                                default:
+                                    buttonType.push('btn-primary');
+                                    break;
+                            }
+                            return (
+                                <LinkButton cssClasses={[buttonType, heroButtonStyles]} link={link?.url?.default}>{link?.text}</LinkButton>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+        </div>
+    </div>
+</section>

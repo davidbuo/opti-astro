@@ -1,0 +1,16 @@
+fragment LeftImageHero on LeftImageHero {
+    Video {
+        ...ContentUrl
+    }
+    Image {
+        ...ContentUrl
+    }
+    Heading
+    SubHeading
+    Body {
+        html
+    }
+    Links {
+        ...LinkCollection
+    }
+}

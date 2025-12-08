@@ -75,13 +75,21 @@
     }
 
     /* Lists with better spacing and styling */
-    ul {
+    ul:not(.prose ul) {
         @apply list-inside list-disc mb-4 space-y-1;
         font-family: var(--font-family-body);
     }
-    ol {
+    ol:not(.prose ol) {
         @apply list-inside list-decimal mb-4 space-y-1;
         font-family: var(--font-family-body);
+    }
+
+    /* Prose lists should use outside positioning for proper bullet display */
+    .prose ul {
+        @apply list-outside list-disc pl-6 mb-4 space-y-2;
+    }
+    .prose ol {
+        @apply list-outside list-decimal pl-6 mb-4 space-y-2;
     }
     
     /* Paragraph styling for optimal readability */

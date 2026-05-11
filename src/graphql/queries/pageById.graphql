@@ -11,6 +11,7 @@ query pageById($key: [String], $loc: [Locales], $ver: String) {
             ...BlogContainer
             ...LandingPage
             ...MockupPage
+            ...ProductPage
         }
     }
 }

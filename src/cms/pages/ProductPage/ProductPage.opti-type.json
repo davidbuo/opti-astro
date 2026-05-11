@@ -1,0 +1,354 @@
+{
+	"key": "ProductPage",
+	"displayName": "Product",
+	"description": "Product Detail Page (PDP) — name, imagery, pricing, variants, ingredients, nutrition, certifications, and storytelling for a single product or SKU.",
+	"baseType": "page",
+	"sortOrder": 0,
+	"mayContainTypes": ["*"],
+	"mediaFileExtensions": [],
+	"compositionBehaviors": [],
+	"properties": {
+		"Sku": {
+			"type": "string",
+			"format": "shortString",
+			"displayName": "SKU",
+			"description": "Stock keeping unit / product code",
+			"localized": false,
+			"required": false,
+			"group": "Identification",
+			"sortOrder": -300,
+			"indexingType": "searchable",
+			"editorSettings": {}
+		},
+		"ProductName": {
+			"type": "string",
+			"displayName": "Product Name",
+			"description": "Primary product name shown as the page H1",
+			"localized": true,
+			"required": false,
+			"group": "Identification",
+			"sortOrder": -250,
+			"indexingType": "searchable",
+			"editorSettings": {}
+		},
+		"ShortDescription": {
+			"type": "string",
+			"displayName": "Short Description",
+			"description": "One-line summary shown under the product name",
+			"localized": true,
+			"required": false,
+			"group": "Identification",
+			"sortOrder": -200,
+			"indexingType": "searchable",
+			"editorSettings": {}
+		},
+		"Category": {
+			"type": "string",
+			"format": "shortString",
+			"displayName": "Category",
+			"description": "Display category (e.g. \"Omega Supplements\")",
+			"localized": true,
+			"required": false,
+			"group": "Identification",
+			"sortOrder": -150,
+			"indexingType": "searchable",
+			"editorSettings": {}
+		},
+		"Badge": {
+			"type": "string",
+			"format": "shortString",
+			"displayName": "Badge",
+			"description": "Marketing badge (e.g. \"Bestseller\", \"New\")",
+			"localized": true,
+			"required": false,
+			"group": "Identification",
+			"sortOrder": -100,
+			"editorSettings": {}
+		},
+
+		"PrimaryImage": {
+			"type": "contentReference",
+			"displayName": "Primary Image",
+			"description": "Hero product image",
+			"localized": true,
+			"required": false,
+			"group": "Media",
+			"sortOrder": -100,
+			"editorSettings": {},
+			"allowedTypes": ["Image"],
+			"restrictedTypes": []
+		},
+		"Gallery": {
+			"type": "array",
+			"format": "LinkCollection",
+			"displayName": "Gallery",
+			"description": "Additional product images (used as thumbnails)",
+			"localized": true,
+			"required": false,
+			"group": "Media",
+			"sortOrder": 0,
+			"editorSettings": {},
+			"items": {
+				"type": "component",
+				"contentType": "link"
+			}
+		},
+
+		"OneTimePrice": {
+			"type": "integer",
+			"displayName": "One-Time Price",
+			"description": "Standard purchase price (whole units of currency)",
+			"localized": false,
+			"required": false,
+			"group": "Pricing",
+			"sortOrder": -100,
+			"editorSettings": {}
+		},
+		"SubscriptionPrice": {
+			"type": "integer",
+			"displayName": "Subscription Price",
+			"description": "Subscriber price (whole units of currency)",
+			"localized": false,
+			"required": false,
+			"group": "Pricing",
+			"sortOrder": -50,
+			"editorSettings": {}
+		},
+		"DiscountPercent": {
+			"type": "integer",
+			"displayName": "Discount %",
+			"description": "Discount percentage shown next to subscription price",
+			"localized": false,
+			"required": false,
+			"group": "Pricing",
+			"sortOrder": 0,
+			"editorSettings": {}
+		},
+		"Currency": {
+			"type": "string",
+			"format": "shortString",
+			"displayName": "Currency",
+			"description": "Currency symbol or code (e.g. \"kr\", \"$\", \"€\")",
+			"localized": true,
+			"required": false,
+			"group": "Pricing",
+			"sortOrder": 50,
+			"editorSettings": {}
+		},
+		"LoyaltyPoints": {
+			"type": "integer",
+			"displayName": "Loyalty Points",
+			"description": "Points / credits earned with this purchase",
+			"localized": false,
+			"required": false,
+			"group": "Pricing",
+			"sortOrder": 100,
+			"editorSettings": {}
+		},
+		"BuyUrl": {
+			"type": "string",
+			"format": "shortString",
+			"displayName": "Buy URL",
+			"description": "Destination for the primary Add-to-Bag CTA",
+			"localized": false,
+			"required": false,
+			"group": "Pricing",
+			"sortOrder": 200,
+			"editorSettings": {}
+		},
+
+		"Volume": {
+			"type": "string",
+			"format": "shortString",
+			"displayName": "Volume / Size",
+			"description": "e.g. \"300 ml\", \"60 capsules\"",
+			"localized": true,
+			"required": false,
+			"group": "KeyFacts",
+			"sortOrder": -100,
+			"editorSettings": {}
+		},
+		"ProductType": {
+			"type": "string",
+			"format": "shortString",
+			"displayName": "Product Type",
+			"description": "e.g. \"Food Supplement\"",
+			"localized": true,
+			"required": false,
+			"group": "KeyFacts",
+			"sortOrder": -50,
+			"editorSettings": {}
+		},
+		"ServingSize": {
+			"type": "string",
+			"format": "shortString",
+			"displayName": "Serving Size",
+			"description": "e.g. \"12 ml\"",
+			"localized": true,
+			"required": false,
+			"group": "KeyFacts",
+			"sortOrder": 0,
+			"editorSettings": {}
+		},
+		"Ingredients": {
+			"type": "string",
+			"format": "html",
+			"displayName": "Ingredients",
+			"description": "Full ingredient declaration",
+			"localized": true,
+			"required": false,
+			"group": "KeyFacts",
+			"sortOrder": 50,
+			"indexingType": "searchable",
+			"editorSettings": {}
+		},
+		"NutritionFacts": {
+			"type": "array",
+			"displayName": "Nutrition Facts",
+			"description": "Per-serving nutrition rows",
+			"localized": true,
+			"required": false,
+			"group": "KeyFacts",
+			"sortOrder": 100,
+			"editorSettings": {},
+			"items": {
+				"type": "component",
+				"contentType": "NutritionRow"
+			}
+		},
+		"UsageInstructions": {
+			"type": "string",
+			"format": "html",
+			"displayName": "Usage Instructions",
+			"description": "Dosage, timing, and warnings",
+			"localized": true,
+			"required": false,
+			"group": "KeyFacts",
+			"sortOrder": 150,
+			"indexingType": "searchable",
+			"editorSettings": {}
+		},
+		"StorageInstructions": {
+			"type": "string",
+			"format": "html",
+			"displayName": "Storage Instructions",
+			"description": "How and where to store the product",
+			"localized": true,
+			"required": false,
+			"group": "KeyFacts",
+			"sortOrder": 200,
+			"editorSettings": {}
+		},
+
+		"Certifications": {
+			"type": "array",
+			"displayName": "Certifications",
+			"description": "Third-party certifications and trust signals",
+			"localized": true,
+			"required": false,
+			"group": "Compliance",
+			"sortOrder": 0,
+			"editorSettings": {},
+			"items": {
+				"type": "component",
+				"contentType": "Certification"
+			}
+		},
+		"Documents": {
+			"type": "array",
+			"format": "LinkCollection",
+			"displayName": "Documents",
+			"description": "Downloadable certificates and product sheets",
+			"localized": true,
+			"required": false,
+			"group": "Compliance",
+			"sortOrder": 100,
+			"editorSettings": {},
+			"items": {
+				"type": "component",
+				"contentType": "link"
+			}
+		},
+
+		"OverviewBody": {
+			"type": "string",
+			"format": "html",
+			"displayName": "Overview Body",
+			"description": "Long-form product story / overview shown below the hero",
+			"localized": true,
+			"required": false,
+			"group": "Content",
+			"sortOrder": -100,
+			"indexingType": "searchable",
+			"editorSettings": {}
+		},
+		"KeyBenefitsArea": {
+			"type": "array",
+			"displayName": "Key Benefits Area",
+			"description": "Marketing benefit cards / paragraphs (drop in Cards, Paragraphs, etc.)",
+			"localized": true,
+			"required": false,
+			"group": "Content",
+			"sortOrder": 0,
+			"editorSettings": {},
+			"items": {
+				"type": "content",
+				"allowedTypes": [],
+				"restrictedTypes": []
+			}
+		},
+		"DetailContentArea": {
+			"type": "array",
+			"displayName": "Detail Content Area",
+			"description": "Expandable detail sections — drop in Collapse components for science, sourcing, formulation, etc.",
+			"localized": true,
+			"required": false,
+			"group": "Content",
+			"sortOrder": 100,
+			"editorSettings": {},
+			"items": {
+				"type": "content",
+				"allowedTypes": [],
+				"restrictedTypes": []
+			}
+		},
+		"RelatedProducts": {
+			"type": "array",
+			"displayName": "Related Products",
+			"description": "Cross-sells / recommendations",
+			"localized": true,
+			"required": false,
+			"group": "Content",
+			"sortOrder": 200,
+			"editorSettings": {},
+			"items": {
+				"type": "content",
+				"allowedTypes": ["ProductPage"],
+				"restrictedTypes": []
+			}
+		},
+
+		"SeoSettings": {
+			"type": "component",
+			"contentType": "PageSeoSettings",
+			"displayName": "SEO Settings",
+			"description": "",
+			"localized": false,
+			"required": false,
+			"group": "SeoSettings",
+			"sortOrder": 0,
+			"editorSettings": {}
+		},
+		"PageAdminSettings": {
+			"type": "component",
+			"contentType": "PageAdminSettings",
+			"displayName": "Page Admin Settings",
+			"description": "",
+			"localized": false,
+			"required": false,
+			"group": "AdminSettings",
+			"sortOrder": 10,
+			"editorSettings": {}
+		}
+	}
+}

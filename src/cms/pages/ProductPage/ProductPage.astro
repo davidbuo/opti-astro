@@ -1,0 +1,489 @@
+---
+import type { Locales } from 'astro';
+import type { ProductPageFragment } from '../../../../__generated/sdk';
+import { getOptimizelySdk } from '../../../graphql/getSdk';
+import type { ContentPayload } from '../../../graphql/shared/ContentPayload';
+import Layout from '../../../layouts/Layout.astro';
+import ContentArea from '../../shared/ContentArea/ContentArea.astro';
+import { isEditContext } from '../../shared/utils.ts';
+
+const isCmsEdit = isEditContext(Astro.url);
+
+export interface Props {
+    contentPayload: ContentPayload;
+}
+const { contentPayload } = Astro.props as Props;
+
+const optiResponse = await getOptimizelySdk(contentPayload).pageById({
+    key: contentPayload.key,
+    //@ts-ignore
+    loc: contentPayload.loc as Locales,
+    ver: contentPayload.ver,
+});
+
+const product = optiResponse?._Page?.item as ProductPageFragment;
+
+const primaryImageSrc =
+    (product?.PrimaryImage as any)?.item?.Url ||
+    product?.PrimaryImage?.url?.default ||
+    '';
+const primaryImageAlt =
+    (product?.PrimaryImage as any)?.item?.AltText ||
+    product?.ProductName ||
+    product?._metadata?.displayName ||
+    'Product image';
+
+const gallery = (product?.Gallery ?? []).filter(
+    (g: any) => g?.url?.default
+);
+const allImages = [
+    primaryImageSrc ? { url: primaryImageSrc, title: primaryImageAlt } : null,
+    ...gallery.map((g: any) => ({ url: g.url.default, title: g.title || primaryImageAlt })),
+].filter(Boolean) as { url: string; title: string }[];
+
+const currency = product?.Currency || '';
+const fmtPrice = (n: number | null | undefined) =>
+    typeof n === 'number' ? `${n.toLocaleString()} ${currency}`.trim() : null;
+
+const oneTime = fmtPrice(product?.OneTimePrice);
+const subPrice = fmtPrice(product?.SubscriptionPrice);
+const discount = product?.DiscountPercent ?? null;
+const points = product?.LoyaltyPoints ?? null;
+
+const relatedProducts = (product?.RelatedProducts ?? []) as any[];
+const certifications = (product?.Certifications ?? []) as any[];
+const nutrition = (product?.NutritionFacts ?? []) as any[];
+const documents = (product?.Documents ?? []).filter(
+    (d: any) => d?.url?.default
+) as any[];
+
+const graphType =
+    product?.SeoSettings?.GraphType && product?.SeoSettings?.GraphType !== '-'
+        ? product?.SeoSettings?.GraphType
+        : 'product';
+const defaultUrl = product?._metadata?.url?.default || '';
+const hierarchicalUrl =
+    product?._metadata?.url?.type === 'SIMPLE'
+        ? product?._metadata?.url?.hierarchical
+        : '';
+const extPreviewEnabled =
+    product?.PageAdminSettings?.EnableExternalPreview ?? false;
+---
+
+<Layout
+    title={product.SeoSettings?.MetaTitle ?? product?.ProductName ?? product?._metadata?.displayName ?? 'Product'}
+    description={product.SeoSettings?.MetaDescription ?? product?.ShortDescription ?? ''}
+    graphtype={graphType}
+    indexing={product.SeoSettings?.Indexing ?? false}
+    contentPayload={contentPayload}
+    defaultUrl={defaultUrl}
+    hierarchicalUrl={hierarchicalUrl ?? ''}
+    extPreviewEnabled={extPreviewEnabled}
+>
+    <div class="bg-base-100">
+        {/* ============================================================ */}
+        {/* HERO — Gallery | Buy Box                                     */}
+        {/* ============================================================ */}
+        <section class="max-w-screen-xl mx-auto px-4 md:px-8 pt-10 md:pt-16 pb-12">
+            {product?.Category && (
+                <p class="nestly-accent mb-6"
+                   data-epi-edit={isCmsEdit ? 'Category' : undefined}>
+                    {product.Category}
+                </p>
+            )}
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+                {/* LEFT — Gallery */}
+                <div
+                    x-data={`{ active: 0, images: ${JSON.stringify(allImages)} }`}
+                    class="lg:sticky lg:top-24"
+                >
+                    <div class="rounded-[2rem] bg-[#F5EFE6] aspect-square w-full overflow-hidden flex items-center justify-center p-8 md:p-12 border border-[#E8D5B7]/60 shadow-[0_6px_24px_-8px_rgba(93,93,93,0.12)]">
+                        {allImages.length > 0 ? (
+                            <img
+                                x-bind:src="images[active]?.url"
+                                x-bind:alt="images[active]?.title"
+                                src={allImages[0].url}
+                                alt={allImages[0].title}
+                                class="max-h-full max-w-full object-contain transition-opacity duration-300"
+                                data-epi-edit={isCmsEdit ? 'PrimaryImage' : undefined}
+                            />
+                        ) : (
+                            <div class="text-base-content/40 text-sm">No image</div>
+                        )}
+                    </div>
+
+                    {allImages.length > 1 && (
+                        <div class="mt-6 flex gap-3 flex-wrap"
+                             data-epi-edit={isCmsEdit ? 'Gallery' : undefined}>
+                            {allImages.map((img, idx) => (
+                                <button
+                                    type="button"
+                                    x-on:click={`active = ${idx}`}
+                                    x-bind:class={`active === ${idx} ? 'ring-2 ring-[#9CAF7F] ring-offset-2' : 'ring-1 ring-base-300 hover:ring-[#9CAF7F]/60'`}
+                                    class="rounded-2xl bg-[#F5EFE6] w-20 h-20 overflow-hidden flex items-center justify-center p-2 transition"
+                                    aria-label={`View image ${idx + 1}`}
+                                >
+                                    <img src={img.url} alt={img.title} class="max-h-full max-w-full object-contain" />
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* RIGHT — Buy box */}
+                <div class="flex flex-col gap-6">
+                    {product?.Badge && (
+                        <span class="nestly-accent inline-block self-start px-3 py-1 rounded-full bg-[#E8D5B7] text-[#5D5D5D]"
+                              data-epi-edit={isCmsEdit ? 'Badge' : undefined}>
+                            {product.Badge}
+                        </span>
+                    )}
+
+                    <div>
+                        <h1 class="nestly-heading text-4xl md:text-5xl mb-3 !mb-3"
+                            data-epi-edit={isCmsEdit ? 'ProductName' : undefined}>
+                            {product?.ProductName ?? product?._metadata?.displayName}
+                        </h1>
+                        {product?.ShortDescription && (
+                            <p class="text-lg text-base-content/70 leading-relaxed !max-w-none !mb-0"
+                               data-epi-edit={isCmsEdit ? 'ShortDescription' : undefined}>
+                                {product.ShortDescription}
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Pricing card */}
+                    {(oneTime || subPrice) && (
+                        <div class="rounded-3xl bg-[#F5EFE6] p-6 md:p-7 border border-[#D9C5A0] shadow-[0_4px_20px_-4px_rgba(93,93,93,0.12)]">
+                            {oneTime && (
+                                <div class="flex items-baseline justify-between gap-4 mb-3">
+                                    <span class="text-sm font-medium text-base-content/60 uppercase tracking-wider">One-time</span>
+                                    <span class="nestly-heading text-3xl font-semibold text-[#3D3D3D]"
+                                          data-epi-edit={isCmsEdit ? 'OneTimePrice' : undefined}>
+                                        {oneTime}
+                                    </span>
+                                </div>
+                            )}
+                            {subPrice && (
+                                <div class="flex items-baseline justify-between gap-4 pt-3 border-t border-[#E8D5B7]">
+                                    <span class="text-sm font-medium uppercase tracking-wider" style="color:#7A8A5F;">
+                                        Subscribe & Save
+                                        {discount ? <span class="ml-2 inline-block px-2 py-0.5 rounded-full bg-[#9CAF7F] text-white text-[10px] font-semibold">−{discount}%</span> : null}
+                                    </span>
+                                    <span class="nestly-heading text-3xl font-semibold" style="color:#7A8A5F;"
+                                          data-epi-edit={isCmsEdit ? 'SubscriptionPrice' : undefined}>
+                                        {subPrice}
+                                    </span>
+                                </div>
+                            )}
+                            {points && (
+                                <p class="text-xs text-base-content/60 mt-3 !mb-0">
+                                    Earn <strong>{points}</strong> loyalty {points === 1 ? 'point' : 'points'} on this order
+                                </p>
+                            )}
+                        </div>
+                    )}
+
+                    {/* CTAs */}
+                    <div class="flex flex-col sm:flex-row gap-3 mt-2">
+                        <a
+                            href={product?.BuyUrl || '#'}
+                            class="btn btn-primary flex-1"
+                        >
+                            Add to Bag
+                        </a>
+                        {subPrice && (
+                            <a
+                                href={product?.BuyUrl || '#'}
+                                class="btn btn-secondary flex-1"
+                            >
+                                Subscribe
+                            </a>
+                        )}
+                    </div>
+
+                    {/* Trust mini-row from certifications */}
+                    {certifications.length > 0 && (
+                        <div class="flex flex-wrap items-center gap-x-6 gap-y-3 pt-4 mt-2 border-t border-base-200">
+                            {certifications.slice(0, 5).map((c: any) => {
+                                const iconSrc = (c?.Icon as any)?.item?.Url || c?.Icon?.url?.default;
+                                return (
+                                    <div class="flex items-center gap-2 text-xs text-base-content/60">
+                                        {iconSrc && (
+                                            <img src={iconSrc} alt={c?.Name || ''} class="h-7 w-7 object-contain" />
+                                        )}
+                                        <span class="font-medium uppercase tracking-wider">{c?.Name}</span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+            </div>
+        </section>
+
+        {/* ============================================================ */}
+        {/* OVERVIEW BODY                                                */}
+        {/* ============================================================ */}
+        {product?.OverviewBody?.html && (
+            <section class="bg-[#FAF7F2] py-16 md:py-24">
+                <div class="max-w-3xl mx-auto px-4 md:px-8 text-center">
+                    <p class="nestly-accent mb-6">The Story</p>
+                    <div
+                        class="prose prose-lg mx-auto prose-p:!max-w-none prose-p:text-base-content/80"
+                        data-epi-edit={isCmsEdit ? 'OverviewBody' : undefined}
+                        set:html={product.OverviewBody.html}
+                    />
+                </div>
+            </section>
+        )}
+
+        {/* ============================================================ */}
+        {/* KEY BENEFITS AREA                                            */}
+        {/* ============================================================ */}
+        {product?.KeyBenefitsArea && product.KeyBenefitsArea.length > 0 && (
+            <section class="max-w-screen-xl mx-auto px-4 md:px-8 py-16 md:py-24">
+                <div class="text-center mb-12">
+                    <p class="nestly-accent mb-4">Why You'll Love It</p>
+                    <h2 class="nestly-heading text-3xl md:text-4xl !mb-0">Crafted to feel good</h2>
+                </div>
+                <div class="flex flex-wrap justify-center gap-6"
+                     data-epi-edit={isCmsEdit ? 'KeyBenefitsArea' : undefined}>
+                    {product.KeyBenefitsArea.map((item: any) => (
+                        <ContentArea
+                            contentPayload={contentPayload}
+                            contentAreaItem={item}
+                        />
+                    ))}
+                </div>
+            </section>
+        )}
+
+        {/* ============================================================ */}
+        {/* INGREDIENTS + NUTRITION                                      */}
+        {/* ============================================================ */}
+        {(product?.Ingredients?.html || nutrition.length > 0) && (
+            <section class="bg-[#FAF7F2] py-16 md:py-24">
+                <div class="max-w-screen-xl mx-auto px-4 md:px-8">
+                    <div class="text-center mb-12">
+                        <p class="nestly-accent mb-4">Inside Every Bottle</p>
+                        <h2 class="nestly-heading text-3xl md:text-4xl !mb-0">Clean. Honest. Traceable.</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        {product?.Ingredients?.html && (
+                            <div class="bg-base-100 rounded-3xl p-8 md:p-10 shadow-[0_6px_24px_-8px_rgba(93,93,93,0.15)] border border-[#EFE5D3]">
+                                <h3 class="nestly-heading text-2xl !mb-4">Ingredients</h3>
+                                <div
+                                    class="prose prose-sm max-w-none text-base-content/80"
+                                    data-epi-edit={isCmsEdit ? 'Ingredients' : undefined}
+                                    set:html={product.Ingredients.html}
+                                />
+                            </div>
+                        )}
+
+                        {nutrition.length > 0 && (
+                            <div class="bg-base-100 rounded-3xl p-8 md:p-10 shadow-sm"
+                                 data-epi-edit={isCmsEdit ? 'NutritionFacts' : undefined}>
+                                <h3 class="nestly-heading text-2xl !mb-2">Nutrition Facts</h3>
+                                {product?.ServingSize && (
+                                    <p class="text-xs uppercase tracking-wider text-base-content/50 !mb-4">
+                                        Per {product.ServingSize} serving
+                                    </p>
+                                )}
+                                <dl class="divide-y divide-base-200">
+                                    {nutrition.map((row: any) => {
+                                        const amt = [row?.Amount, row?.Unit].filter(Boolean).join(' ');
+                                        const dv = row?.PercentDailyValue ? `${row.PercentDailyValue}% NRV` : '';
+                                        return (
+                                            <div class={`flex items-baseline justify-between py-3 ${row?.IsHighlighted ? 'font-semibold text-[#7A8A5F]' : ''}`}>
+                                                <dt class="text-sm">{row?.Nutrient}</dt>
+                                                <dd class="text-sm text-right">
+                                                    <span>{amt}</span>
+                                                    {dv && <span class="ml-3 text-xs text-base-content/50">{dv}</span>}
+                                                </dd>
+                                            </div>
+                                        );
+                                    })}
+                                </dl>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </section>
+        )}
+
+        {/* ============================================================ */}
+        {/* DETAIL CONTENT AREA — long-form expandables                  */}
+        {/* ============================================================ */}
+        {product?.DetailContentArea && product.DetailContentArea.length > 0 && (
+            <section class="max-w-3xl mx-auto px-4 md:px-8 py-16 md:py-24">
+                <div class="text-center mb-12">
+                    <p class="nestly-accent mb-4">The Details</p>
+                    <h2 class="nestly-heading text-3xl md:text-4xl !mb-0">Everything you'd want to know</h2>
+                </div>
+                <div class="flex flex-col gap-3"
+                     data-epi-edit={isCmsEdit ? 'DetailContentArea' : undefined}>
+                    {product.DetailContentArea.map((item: any) => (
+                        <ContentArea
+                            contentPayload={contentPayload}
+                            contentAreaItem={item}
+                        />
+                    ))}
+                </div>
+            </section>
+        )}
+
+        {/* ============================================================ */}
+        {/* CERTIFICATIONS GRID                                          */}
+        {/* ============================================================ */}
+        {certifications.length > 0 && (
+            <section class="bg-[#F5EFE6] py-16 md:py-24">
+                <div class="max-w-screen-xl mx-auto px-4 md:px-8">
+                    <div class="text-center mb-12">
+                        <p class="nestly-accent mb-4">Trusted & Certified</p>
+                        <h2 class="nestly-heading text-3xl md:text-4xl !mb-0">Quality you can verify</h2>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                         data-epi-edit={isCmsEdit ? 'Certifications' : undefined}>
+                        {certifications.map((c: any) => {
+                            const iconSrc = (c?.Icon as any)?.item?.Url || c?.Icon?.url?.default;
+                            return (
+                                <div class="bg-base-100 rounded-3xl p-7 flex flex-col gap-4 shadow-[0_6px_24px_-8px_rgba(93,93,93,0.15)] border border-[#EFE5D3]">
+                                    <div class="flex items-center gap-4">
+                                        {iconSrc && (
+                                            <div class="h-12 w-12 flex items-center justify-center bg-[#FAF7F2] rounded-2xl">
+                                                <img src={iconSrc} alt={c?.Name || ''} class="h-8 w-8 object-contain" />
+                                            </div>
+                                        )}
+                                        <h3 class="nestly-heading text-lg !mb-0">{c?.Name}</h3>
+                                    </div>
+                                    {c?.Description?.html && (
+                                        <div
+                                            class="prose prose-sm max-w-none text-base-content/70 !mb-0"
+                                            set:html={c.Description.html}
+                                        />
+                                    )}
+                                    {c?.DetailsUrl && (
+                                        <a href={c.DetailsUrl} class="text-sm font-medium mt-auto" style="color:#7A8A5F;">
+                                            Learn more →
+                                        </a>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </section>
+        )}
+
+        {/* ============================================================ */}
+        {/* USAGE + STORAGE                                              */}
+        {/* ============================================================ */}
+        {(product?.UsageInstructions?.html || product?.StorageInstructions?.html) && (
+            <section class="max-w-screen-xl mx-auto px-4 md:px-8 py-16 md:py-24">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {product?.UsageInstructions?.html && (
+                        <div class="rounded-3xl bg-[#FAF7F2] border border-[#E8D5B7]/50 p-8 md:p-10 shadow-[0_4px_20px_-6px_rgba(93,93,93,0.08)]">
+                            <p class="nestly-accent mb-3">How to Use</p>
+                            <div
+                                class="prose prose-sm max-w-none text-base-content/80"
+                                data-epi-edit={isCmsEdit ? 'UsageInstructions' : undefined}
+                                set:html={product.UsageInstructions.html}
+                            />
+                        </div>
+                    )}
+                    {product?.StorageInstructions?.html && (
+                        <div class="rounded-3xl bg-[#FAF7F2] border border-[#E8D5B7]/50 p-8 md:p-10 shadow-[0_4px_20px_-6px_rgba(93,93,93,0.08)]">
+                            <p class="nestly-accent mb-3">Storage</p>
+                            <div
+                                class="prose prose-sm max-w-none text-base-content/80"
+                                data-epi-edit={isCmsEdit ? 'StorageInstructions' : undefined}
+                                set:html={product.StorageInstructions.html}
+                            />
+                        </div>
+                    )}
+                </div>
+            </section>
+        )}
+
+        {/* ============================================================ */}
+        {/* DOCUMENTS                                                    */}
+        {/* ============================================================ */}
+        {documents.length > 0 && (
+            <section class="bg-[#FAF7F2] py-16 md:py-24">
+                <div class="max-w-screen-xl mx-auto px-4 md:px-8">
+                    <div class="text-center mb-12">
+                        <p class="nestly-accent mb-4">Documents</p>
+                        <h2 class="nestly-heading text-3xl md:text-4xl !mb-0">Certificates & datasheets</h2>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto"
+                         data-epi-edit={isCmsEdit ? 'Documents' : undefined}>
+                        {documents.map((doc: any) => (
+                            <a
+                                href={doc.url.default}
+                                target="_blank"
+                                rel="noopener"
+                                class="flex items-center gap-4 bg-base-100 rounded-2xl p-5 hover:shadow-md transition-shadow border border-base-200 !no-underline"
+                            >
+                                <div class="h-10 w-10 rounded-full bg-[#9CAF7F]/15 flex items-center justify-center flex-shrink-0">
+                                    <svg class="h-5 w-5" style="color:#7A8A5F;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z" />
+                                    </svg>
+                                </div>
+                                <span class="text-sm font-medium text-base-content flex-1">
+                                    {doc.title || 'Download'}
+                                </span>
+                            </a>
+                        ))}
+                    </div>
+                </div>
+            </section>
+        )}
+
+        {/* ============================================================ */}
+        {/* RELATED PRODUCTS                                             */}
+        {/* ============================================================ */}
+        {relatedProducts.length > 0 && (
+            <section class="max-w-screen-xl mx-auto px-4 md:px-8 py-16 md:py-24">
+                <div class="text-center mb-12">
+                    <p class="nestly-accent mb-4">Discover More</p>
+                    <h2 class="nestly-heading text-3xl md:text-4xl !mb-0">You might also love</h2>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+                     data-epi-edit={isCmsEdit ? 'RelatedProducts' : undefined}>
+                    {relatedProducts.map((rp: any) => {
+                        const rUrl = rp?._metadata?.url?.default || '#';
+                        const rImg = (rp?.PrimaryImage as any)?.item?.Url || rp?.PrimaryImage?.url?.default;
+                        const rName = rp?.ProductName || rp?._metadata?.displayName;
+                        const rPrice = typeof rp?.OneTimePrice === 'number'
+                            ? `${rp.OneTimePrice.toLocaleString()} ${rp?.Currency || ''}`.trim()
+                            : null;
+                        return (
+                            <a href={rUrl} class="group flex flex-col !no-underline">
+                                <div class="rounded-3xl bg-[#F5EFE6] aspect-square overflow-hidden flex items-center justify-center p-6 mb-4 border border-[#E8D5B7]/70 shadow-[0_4px_16px_-6px_rgba(93,93,93,0.1)] transition-shadow group-hover:shadow-[0_8px_24px_-6px_rgba(93,93,93,0.18)]">
+                                    {rImg ? (
+                                        <img src={rImg} alt={rName} class="max-h-full max-w-full object-contain transition-transform group-hover:scale-105" />
+                                    ) : (
+                                        <span class="text-base-content/30 text-xs">No image</span>
+                                    )}
+                                </div>
+                                {rp?.Category && (
+                                    <p class="nestly-accent !mb-1">{rp.Category}</p>
+                                )}
+                                <h3 class="nestly-heading text-lg !mb-1 text-base-content">{rName}</h3>
+                                {rp?.ShortDescription && (
+                                    <p class="text-sm text-base-content/60 !mb-2 line-clamp-2">{rp.ShortDescription}</p>
+                                )}
+                                {rPrice && (
+                                    <p class="text-sm font-semibold !mb-0" style="color:#7A8A5F;">{rPrice}</p>
+                                )}
+                            </a>
+                        );
+                    })}
+                </div>
+            </section>
+        )}
+    </div>
+</Layout>

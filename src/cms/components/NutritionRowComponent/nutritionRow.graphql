@@ -1,0 +1,7 @@
+fragment NutritionRow on NutritionRowProperty {
+    Nutrient
+    Amount
+    Unit
+    PercentDailyValue
+    IsHighlighted
+}

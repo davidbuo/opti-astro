@@ -1,0 +1,99 @@
+fragment ProductPage on ProductPage {
+    _metadata {
+        ...PageUrl
+        published
+        displayName
+    }
+    Sku
+    ProductName
+    ShortDescription
+    Category
+    Badge
+
+    PrimaryImage {
+        ...ContentUrl
+    }
+    Gallery {
+        url {
+            default
+        }
+        title
+    }
+
+    OneTimePrice
+    SubscriptionPrice
+    DiscountPercent
+    Currency
+    LoyaltyPoints
+    BuyUrl
+
+    Volume
+    ProductType
+    ServingSize
+    Ingredients {
+        html
+    }
+    NutritionFacts {
+        ...NutritionRow
+    }
+    UsageInstructions {
+        html
+    }
+    StorageInstructions {
+        html
+    }
+
+    Certifications {
+        ...Certification
+    }
+    Documents {
+        url {
+            default
+        }
+        title
+    }
+
+    OverviewBody {
+        html
+    }
+    KeyBenefitsArea {
+        _metadata {
+            types
+        }
+        ...ContentArea
+    }
+    DetailContentArea {
+        _metadata {
+            types
+        }
+        ...ContentArea
+    }
+    RelatedProducts {
+        _metadata {
+            key
+            displayName
+            url {
+                default
+                hierarchical
+            }
+        }
+        ... on ProductPage {
+            Sku
+            ProductName
+            ShortDescription
+            Category
+            OneTimePrice
+            Currency
+            PrimaryImage {
+                ...ContentUrl
+            }
+        }
+    }
+
+    SeoSettings {
+        ...PageSeoSettingsProperty
+    }
+    PageAdminSettings {
+        ...PageAdminSettingsProperty
+    }
+}

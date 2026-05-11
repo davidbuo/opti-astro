@@ -1,0 +1,66 @@
+{
+	"key": "NutritionRow",
+	"displayName": "Nutrition Row",
+	"description": "A single row in a product's nutrition facts table (one nutrient per row).",
+	"baseType": "component",
+	"sortOrder": 0,
+	"mayContainTypes": [],
+	"mediaFileExtensions": [],
+	"compositionBehaviors": ["elementEnabled"],
+	"properties": {
+		"Nutrient": {
+			"type": "string",
+			"displayName": "Nutrient",
+			"description": "Name of the nutrient (e.g. Omega-3, EPA, Vitamin D3)",
+			"localized": true,
+			"required": false,
+			"group": "Information",
+			"sortOrder": -100,
+			"indexingType": "searchable",
+			"editorSettings": {}
+		},
+		"Amount": {
+			"type": "string",
+			"format": "shortString",
+			"displayName": "Amount",
+			"description": "Numeric amount per serving (e.g. 1283)",
+			"localized": false,
+			"required": false,
+			"group": "Information",
+			"sortOrder": 0,
+			"editorSettings": {}
+		},
+		"Unit": {
+			"type": "string",
+			"format": "shortString",
+			"displayName": "Unit",
+			"description": "Unit of measurement (e.g. mg, µg, g)",
+			"localized": false,
+			"required": false,
+			"group": "Information",
+			"sortOrder": 100,
+			"editorSettings": {}
+		},
+		"PercentDailyValue": {
+			"type": "string",
+			"format": "shortString",
+			"displayName": "% Daily Value",
+			"description": "Percent of daily reference intake (NRV), e.g. 400",
+			"localized": false,
+			"required": false,
+			"group": "Information",
+			"sortOrder": 200,
+			"editorSettings": {}
+		},
+		"IsHighlighted": {
+			"type": "boolean",
+			"displayName": "Highlighted",
+			"description": "Show this row with emphasis (e.g. headline nutrient)",
+			"localized": false,
+			"required": false,
+			"group": "Information",
+			"sortOrder": 300,
+			"editorSettings": {}
+		}
+	}
+}

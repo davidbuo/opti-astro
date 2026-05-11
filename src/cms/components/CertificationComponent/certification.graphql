@@ -1,0 +1,10 @@
+fragment Certification on CertificationProperty {
+    Name
+    Description {
+        html
+    }
+    Icon {
+        ...ContentUrl
+    }
+    DetailsUrl
+}

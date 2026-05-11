@@ -1,0 +1,58 @@
+{
+	"key": "Certification",
+	"displayName": "Certification",
+	"description": "Third-party certification or trust signal shown on a Product page (e.g. Friend of the Sea, GMP, Informed Sport).",
+	"baseType": "component",
+	"sortOrder": 0,
+	"mayContainTypes": [],
+	"mediaFileExtensions": [],
+	"compositionBehaviors": ["elementEnabled"],
+	"properties": {
+		"Name": {
+			"type": "string",
+			"displayName": "Name",
+			"description": "Certification or badge name",
+			"localized": true,
+			"required": false,
+			"group": "Information",
+			"sortOrder": -100,
+			"indexingType": "searchable",
+			"editorSettings": {}
+		},
+		"Description": {
+			"type": "string",
+			"format": "html",
+			"displayName": "Description",
+			"description": "What this certification means",
+			"localized": true,
+			"required": false,
+			"group": "Information",
+			"sortOrder": 0,
+			"indexingType": "searchable",
+			"editorSettings": {}
+		},
+		"Icon": {
+			"type": "contentReference",
+			"displayName": "Icon",
+			"description": "Logo or badge image",
+			"localized": false,
+			"required": false,
+			"group": "Information",
+			"sortOrder": 100,
+			"editorSettings": {},
+			"allowedTypes": ["Image"],
+			"restrictedTypes": []
+		},
+		"DetailsUrl": {
+			"type": "string",
+			"format": "shortString",
+			"displayName": "Details URL",
+			"description": "Optional link to certifier or details page",
+			"localized": false,
+			"required": false,
+			"group": "Information",
+			"sortOrder": 200,
+			"editorSettings": {}
+		}
+	}
+}

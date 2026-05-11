@@ -122,6 +122,121 @@ async function ensurePropertyGroups(contentType, existingGroups) {
     }
 }
 
+/**
+ * Upsert a content type: try PATCH first; if 404, fall back to CREATE.
+ * Replaces the removed contentTypesPut from earlier CLI versions.
+ */
+/**
+ * Built-in base type keys that the preview3 API expects with a leading underscore
+ * (e.g. _image, _video, _component, _page, _folder, _media).
+ * Custom content types (like "ProductPage", "FAQItem") keep their bare names.
+ */
+const BUILTIN_TYPE_NAMES = new Set([
+    'component', 'page', 'image', 'video', 'folder', 'media', 'experience', 'section', 'element',
+]);
+
+function prefixBuiltin(name) {
+    if (typeof name !== 'string') return name;
+    if (name.startsWith('_')) return name;
+    return BUILTIN_TYPE_NAMES.has(name.toLowerCase()) ? `_${name.toLowerCase()}` : name;
+}
+
+function normalizeAllowedTypes(arr) {
+    if (!Array.isArray(arr)) return arr;
+    return arr.map(prefixBuiltin);
+}
+
+function normalizeProperty(prop) {
+    const p = { ...prop };
+
+    // string+html → richText
+    if (p.type === 'string' && p.format === 'html') {
+        p.type = 'richText';
+        delete p.format;
+    }
+
+    if (Array.isArray(p.allowedTypes)) p.allowedTypes = normalizeAllowedTypes(p.allowedTypes);
+    if (Array.isArray(p.restrictedTypes)) p.restrictedTypes = normalizeAllowedTypes(p.restrictedTypes);
+
+    if (p.items && typeof p.items === 'object') {
+        const items = { ...p.items };
+        // string+html inside items
+        if (items.type === 'string' && items.format === 'html') {
+            items.type = 'richText';
+            delete items.format;
+        }
+        // { type: "component", contentType: "link" } → { type: "link" } (built-in link)
+        if (items.type === 'component' && items.contentType === 'link') {
+            items.type = 'link';
+            delete items.contentType;
+        }
+        if (Array.isArray(items.allowedTypes)) items.allowedTypes = normalizeAllowedTypes(items.allowedTypes);
+        if (Array.isArray(items.restrictedTypes)) items.restrictedTypes = normalizeAllowedTypes(items.restrictedTypes);
+        p.items = items;
+    }
+
+    return p;
+}
+
+/**
+ * Normalize a content-type body for the preview3 API.
+ * - baseType: "component" → "_component"
+ * - allowedTypes: "Image"/"Video"/etc. → "_image"/"_video"
+ * - properties[*]: string+html → richText, items.{component,link} → link, recursively normalize allowedTypes
+ */
+function normalizeContentTypeForApi(body) {
+    const out = { ...body };
+    if (typeof out.baseType === 'string') out.baseType = prefixBuiltin(out.baseType);
+    if (Array.isArray(out.mayContainTypes)) out.mayContainTypes = normalizeAllowedTypes(out.mayContainTypes);
+
+    if (out.properties && typeof out.properties === 'object') {
+        const normalized = {};
+        for (const [k, v] of Object.entries(out.properties)) {
+            normalized[k] = normalizeProperty(v);
+        }
+        out.properties = normalized;
+    }
+
+    return out;
+}
+
+function describeApiError(e) {
+    const status = e?.status ?? e?.response?.status;
+    const body = e?.body ?? e?.response?.body;
+    const bodyStr = typeof body === 'string' ? body : (body ? JSON.stringify(body) : '');
+    return `status=${status ?? '?'} ${bodyStr || e?.message || ''}`.trim();
+}
+
+async function upsertContentType(contentTypeKey, body) {
+    const apiBody = normalizeContentTypeForApi(body);
+
+    // Check existence first via GET (404 => create, 200 => patch)
+    let exists = false;
+    try {
+        await client.contentTypes.contentTypesGet(contentTypeKey);
+        exists = true;
+    } catch (e) {
+        const status = e?.status ?? e?.response?.status;
+        if (status !== 404) {
+            throw new Error(`GET ${contentTypeKey} failed: ${describeApiError(e)}`);
+        }
+    }
+
+    try {
+        if (exists) {
+            await client.contentTypes.contentTypesPatch(
+                contentTypeKey,
+                apiBody,
+                true /* cmsIgnoreDataLossWarnings */
+            );
+        } else {
+            await client.contentTypes.contentTypesCreate(apiBody);
+        }
+    } catch (e) {
+        throw new Error(`${exists ? 'PATCH' : 'CREATE'} ${contentTypeKey} failed: ${describeApiError(e)}`);
+    }
+}
+
 // Get command line argument for specific type
 const typeNameArg = process.argv[2];
 
@@ -170,11 +285,7 @@ const typeNameArg = process.argv[2];
         if (cleanContentType.created) delete cleanContentType.created;
 
         try {
-            await client.contentTypes.contentTypesPut(
-                contentTypeKey,
-                cleanContentType,
-                true // Force update
-            );
+            await upsertContentType(contentTypeKey, cleanContentType);
             console.log(
                 `✅ Content type "${displayName}" (${contentTypeKey}) of baseType ${baseType} has been updated`
             );
@@ -229,12 +340,7 @@ const typeNameArg = process.argv[2];
             if (cleanContentType.created) delete cleanContentType.created;
 
             try {
-                // Push the content type to Optimizely CMS
-                await client.contentTypes.contentTypesPut(
-                    contentTypeKey,
-                    cleanContentType,
-                    true // Force update
-                );
+                await upsertContentType(contentTypeKey, cleanContentType);
                 console.log(
                     `✅ Content type "${displayName}" (${contentTypeKey}) of baseType ${baseType} has been updated`
                 );
